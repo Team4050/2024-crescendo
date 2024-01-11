@@ -18,7 +18,7 @@ public final class Constants {
   };
 
   public static class MotorCANValues {
-
+    public static final int leftMotor1 = 1;
   };
 
   public static class MotorDriveValues {
