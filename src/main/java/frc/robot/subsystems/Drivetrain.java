@@ -11,13 +11,17 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
 public class Drivetrain extends SubsystemBase {
     /* Motors */
 
-    PWMMotorController right;
-    PWMMotorController left;
+    PWMMotorController rightFront;
+    PWMMotorController leftFront;
+    PWMMotorController rightBack;
+    PWMMotorController leftBack;
 
     private DifferentialDrive drivetrain;
 
     public Drivetrain() {
-        drivetrain = new DifferentialDrive(left, right);
+        leftFront.addFollower(leftBack);
+        rightFront.addFollower(rightBack);
+        drivetrain = new DifferentialDrive(leftFront, rightFront);
     }
 
     /**

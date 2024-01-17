@@ -19,6 +19,18 @@ public final class Constants {
 
   public static class MotorCANValues {
     public static final int leftMotor1 = 1;
+    public static final int leftMotor2 = 1;
+    public static final int rightMotor1 = 1;
+    public static final int rightMotor2 = 1;
+
+    public static final int leftClimber = 1;
+    public static final int rightClimber = 1;
+
+    public static final int leftShooterWheel = 1;
+    public static final int rightShooterWheel = 1;
+
+    public static final int intakeFront = 1;
+    public static final int intakeBack = 1;
   };
 
   public static class MotorDriveValues {
