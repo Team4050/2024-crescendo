@@ -26,7 +26,6 @@ public class Drivetrain extends SubsystemBase {
     TalonSRX rightBack;
     TalonSRX leftBack;
 
-    private DifferentialDrive drivetrain;
     private DifferentialDriveKinematics kinematics;
 
     public Drivetrain() {
