@@ -18,19 +18,19 @@ public final class Constants {
   };
 
   public static class MotorCANValues {
-    public static final int leftMotor1 = 1;
-    public static final int leftMotor2 = 1;
-    public static final int rightMotor1 = 1;
-    public static final int rightMotor2 = 1;
+    //All motors are Talon SRX
+    public static final int leftMotorFront = 4;
+    public static final int leftMotorRear = 1;
+    public static final int rightMotorFront = 2;
+    public static final int rightMotorRear = 3;
 
-    public static final int leftClimber = 1;
-    public static final int rightClimber = 1;
+    public static final int leftClimber = 8; //TODO: Confirm this is the left one
+    public static final int rightClimber = 9;
 
-    public static final int leftShooterWheel = 1;
+    public static final int leftShooterWheel = 1; //Shooter wheels detached
     public static final int rightShooterWheel = 1;
 
-    public static final int intakeFront = 1;
-    public static final int intakeBack = 1;
+    public static final int intake = 7;
   };
 
   public static class MotorDriveValues {
