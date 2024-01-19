@@ -24,4 +24,8 @@ public final class Constants {
   public static class MotorDriveValues {
 
   };
+
+  public static class Sensors {
+    public static final String LimelightName = "";
+  }
 }
