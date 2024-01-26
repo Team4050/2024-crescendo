@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.TestAuto;
 import frc.robot.subsystems.Drivetrain;
 
 import org.photonvision.PhotonCamera;
@@ -30,7 +31,6 @@ public class RobotContainer {
   /* Commands */
 
   /* Sensors */
-  private final PhotonCamera limelight;
 
   /* Misc */
 
@@ -42,7 +42,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    limelight = null;//new PhotonCamera(Constants.Sensors.LimelightName);
+    //limelight = null;//new PhotonCamera(Constants.Sensors.LimelightName);
     drivetrain = new Drivetrain();
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
@@ -72,6 +72,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;//Autos.exampleAuto(m_exampleSubsystem);
+    return new TestAuto(drivetrain);//Autos.exampleAuto(m_exampleSubsystem);
   }
 }

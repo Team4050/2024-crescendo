@@ -41,7 +41,7 @@ public final class Constants {
   };
 
   public static class Sensors {
-    public static final String LimelightName = "";
+    public static final String LimelightName = "Limelight";
     public static final Transform3d RobotToCamera = new Transform3d();
   }
 }

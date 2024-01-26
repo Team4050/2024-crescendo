@@ -38,7 +38,7 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 public class HazardVision {
   public PhotonCamera chassis;
-  public PhotonCamera claw;
+  //public PhotonCamera claw;
   private PhotonPoseEstimator poseEstimator;
 
   public HazardVision() {
