@@ -70,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
         rightFront = new TalonSRX(Constants.MotorCANValues.rightMotorFront);
         leftBack = new TalonSRX(Constants.MotorCANValues.leftMotorRear);
         rightBack = new TalonSRX(Constants.MotorCANValues.rightMotorRear);
-        kinematics = new DifferentialDriveKinematics(0.2);
+        kinematics = new DifferentialDriveKinematics(0.5461);
         estimator = new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
         position = initial;
         //TODO: tune
@@ -95,7 +95,7 @@ public class Drivetrain extends SubsystemBase {
         //track width ~20 inch?
         controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
 
-        ramController = new RamseteController(1, 1);
+        ramController = new RamseteController(1, 0.5);
     }
 
     private LinearSystem<N2, N2, N2> buildPlant(double r, double rb, double Gl, double Gr, double J, double m, double Kt, double Kv, double Rl, double Rr) {
@@ -179,8 +179,8 @@ public class Drivetrain extends SubsystemBase {
 
     public void setControl(double lSpeed, double rSpeed) {
         DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, new Pose2d(), lSpeed, rSpeed);
-        System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
-        System.out.println("control: " + v.left + " " + v.right);
+        //System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
+        //System.out.println("control: " + v.left + " " + v.right);
         set(v.left, v.right);
     }
 
@@ -225,8 +225,7 @@ public class Drivetrain extends SubsystemBase {
         State p = s.sample(t);
         ChassisSpeeds c = ChassisSpeeds.fromFieldRelativeSpeeds(ramController.calculate(position, p), position.getRotation());
         DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(c);
-        System.out.println("following");
-        set(speeds.leftMetersPerSecond, speeds.rightMetersPerSecond);
+        set(speeds.leftMetersPerSecond / 10, speeds.rightMetersPerSecond / 10);
         //add velocity references
         return speeds;
     }

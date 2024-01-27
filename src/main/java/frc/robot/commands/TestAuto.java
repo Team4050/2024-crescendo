@@ -38,7 +38,7 @@ public class TestAuto extends Command {
         trajectory = TrajectoryGenerator.generateTrajectory(
             new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
             new ArrayList<Translation2d>(),
-            new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
+            new Pose2d(3, 3, Rotation2d.fromDegrees(0)),
             tconfig);
         end = timer.get() + trajectory.getTotalTimeSeconds();
     }
