@@ -46,7 +46,7 @@ public class RobotContainer {
     drivetrain = new Drivetrain();
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
-      drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
+      drivetrain.setControl(m_driverController.getLeftY(), m_driverController.getRightY());
     }, drivetrain));
   }
 
@@ -60,9 +60,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    drivetrain.setDefaultCommand(new RunCommand(() -> {
-      drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
-    }, drivetrain));
+
   }
 
   /**

@@ -44,7 +44,10 @@ public class TestAuto extends Command {
     public void execute() {
         // TODO Auto-generated method stub
         DifferentialDriveWheelVoltages d = drive.follow(trajectory, timer.get());
-
+        drive.setControl(1, 1);
+        double end = timer.get() + 1;
+        while (timer.get() < end) {};
+        drive.setControl(0, 0);
         System.out.println("Wheel voltages: " + d.left + " " + d.right);
     }
 

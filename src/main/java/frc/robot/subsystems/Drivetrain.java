@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
@@ -74,8 +75,24 @@ public class Drivetrain extends SubsystemBase {
         angle = new PIDController(0, 0, 0);
         vision = new HazardVision();
         Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
-        Vector<N2> relems = VecBuilder.fill(0.2, 0.2);
+        Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
 
+        Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
+        Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
+        Matrix<N2, N2> C = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
+        Matrix<N2, N2> D = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
+
+        double maxV =
+        A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
+        System.out.println(maxV);
+
+        LinearSystem<N2, N2, N2> plant = buildPlant(0.0762, 0.27305, 0.093, 0.093, 5.0, 40.0, 1, 1, 1, 1);
+
+        //track width ~20 inch?
+        controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
+    }
+
+    private LinearSystem<N2, N2, N2> buildPlant(double r, double rb, double Gl, double Gr, double J, double m, double Kt, double Kv, double Rl, double Rr) {
         /*
          * https://file.tavsys.net/control/controls-engineering-in-frc.pdf#Hfootnote.27
          * State vector (velocities)
@@ -106,17 +123,25 @@ public class Drivetrain extends SubsystemBase {
          * B = [ c1 * C2  c2 * C4 ]
          *     [ c2 * C2  c1 * C4 ]
          */
-        Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -1, 0, 0, -1);
-        Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
+        double C1 = -Math.pow(Gl, 2) * Kt / (Rl * Kv * Math.pow(r, 2));
+        double C2 = Gl * Kt / (Rl * r);
+        double C3 = -Math.pow(Gr, 2) * Kt / (Rr * Kv * Math.pow(r, 2));
+        double C4 = Gr * Kt / (Rr * r);
+        double c1 = 1 / m + (Math.pow(rb, 2) / J);
+        double c2 = 1 / m - (Math.pow(rb, 2) / J);
+
+        System.out.println("constants: " + c1 + " " + c2);
+
+        Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, c1 * C1, c2 * C3, c2 * C1, c1 * C3);
+        Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, c1 * C2, c2 * C4, c2 * C2, c1 * C4);
         Matrix<N2, N2> C = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
         Matrix<N2, N2> D = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
 
         double maxV =
-        A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
-        System.out.println(maxV);
+            A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
+        System.out.println("Max V: " + maxV);
 
-        //track width ~20 inch?
-        controller = new LTVDifferentialDriveController(new LinearSystem<N2, N2, N2>(A, B, C, D), 0.508, qelems, relems, 2);
+        return new LinearSystem<N2, N2, N2>(A, B, C, D);
     }
 
     public Drivetrain() {
@@ -146,8 +171,14 @@ public class Drivetrain extends SubsystemBase {
         rightBack.set(TalonSRXControlMode.PercentOutput, rSpeed);
     }
 
-    public void set(Pose2d direction) {
+    public void setControl(double lSpeed, double rSpeed) {
+        DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, new Pose2d(), lSpeed, rSpeed);
+        System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
+        System.out.println("control: " + v.left + " " + v.right);
+        set(v.left / 2, v.right / 2);
 
+        if ((v.left < 0.5 && v.right < 0.5) || true); {
+        }
     }
 
     /**
