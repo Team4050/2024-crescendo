@@ -22,6 +22,7 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 import edu.wpi.first.math.controller.LTVDifferentialDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,6 +31,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N5;
@@ -54,6 +56,7 @@ public class Drivetrain extends SubsystemBase {
     private PIDController velocity;
     private PIDController angle;
     private LTVDifferentialDriveController controller;
+    private RamseteController ramController;
 
     private DifferentialDrive drivetrain;
     private Pose2d position;
@@ -91,6 +94,8 @@ public class Drivetrain extends SubsystemBase {
 
         //track width ~20 inch?
         controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
+
+        ramController = new RamseteController(1, 1);
     }
 
     private LinearSystem<N2, N2, N2> buildPlant(double r, double rb, double Gl, double Gr, double J, double m, double Kt, double Kv, double Rl, double Rr) {
@@ -166,7 +171,7 @@ public class Drivetrain extends SubsystemBase {
      * @param rSpeed
      */
     public void set(double lSpeed, double rSpeed) {
-        leftFront.set(TalonSRXControlMode.Current, lSpeed);
+        leftFront.set(TalonSRXControlMode.PercentOutput, lSpeed);
         leftBack.set(TalonSRXControlMode.PercentOutput, lSpeed);
         rightFront.set(TalonSRXControlMode.PercentOutput, rSpeed);
         rightBack.set(TalonSRXControlMode.PercentOutput, rSpeed);
@@ -204,8 +209,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // TODO Auto-generated method stub
         super.periodic();
+
+        estimator.update(new Rotation2d(), new DifferentialDriveWheelPositions(leftFront.getSelectedSensorPosition() * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorPosition() * Math.PI * 0.0762 / 4096));
 
         Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
         //System.out.println("periodic");
@@ -215,9 +221,13 @@ public class Drivetrain extends SubsystemBase {
         }
     }
 
-    public DifferentialDriveWheelVoltages follow(Trajectory s, double t) {
+    public DifferentialDriveWheelSpeeds follow(Trajectory s, double t) {
         State p = s.sample(t);
+        ChassisSpeeds c = ChassisSpeeds.fromFieldRelativeSpeeds(ramController.calculate(position, p), position.getRotation());
+        DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(c);
+        System.out.println("following");
+        set(speeds.leftMetersPerSecond, speeds.rightMetersPerSecond);
         //add velocity references
-        return controller.calculate(estimator.getEstimatedPosition(), leftFront.getSelectedSensorVelocity(), rightFront.getSelectedSensorVelocity(), p);
+        return speeds;
     }
 }
