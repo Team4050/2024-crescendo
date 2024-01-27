@@ -51,8 +51,6 @@ public class Drivetrain extends SubsystemBase {
     TalonSRX rightBack;
     TalonSRX leftBack;
 
-    private PIDController velocity;
-    private PIDController angle;
     private LTVDifferentialDriveController controller;
 
     private DifferentialDrive drivetrain;
@@ -71,8 +69,6 @@ public class Drivetrain extends SubsystemBase {
         estimator = new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
         position = initial;
         //TODO: tune
-        velocity = new PIDController(0, 0, 0);
-        angle = new PIDController(0, 0, 0);
         vision = new HazardVision();
         Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
         Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
@@ -87,7 +83,7 @@ public class Drivetrain extends SubsystemBase {
         System.out.println(maxV);
 
         //Gear ratio for 2022 was 10.75:1
-        LinearSystem<N2, N2, N2> plant = buildPlant(0.0762, 0.27305, 0.093, 0.093, 5.0, 40.0, 1, 1, 1, 1);
+        LinearSystem<N2, N2, N2> plant = buildPlant(0.0762, 0.27305, 0.118, 0.118, 5.0, 40.0, 1, 1, 1, 1);
 
         //track width ~20 inch?
         controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
@@ -167,9 +163,9 @@ public class Drivetrain extends SubsystemBase {
      */
     public void set(double lSpeed, double rSpeed) {
         leftFront.set(TalonSRXControlMode.Current, lSpeed);
-        leftBack.set(TalonSRXControlMode.PercentOutput, lSpeed);
-        rightFront.set(TalonSRXControlMode.PercentOutput, rSpeed);
-        rightBack.set(TalonSRXControlMode.PercentOutput, rSpeed);
+        leftBack.set(TalonSRXControlMode.Current, lSpeed);
+        rightFront.set(TalonSRXControlMode.Current, rSpeed);
+        rightBack.set(TalonSRXControlMode.Current, rSpeed);
     }
 
     public void setControl(double lSpeed, double rSpeed) {
@@ -195,7 +191,6 @@ public class Drivetrain extends SubsystemBase {
     public void goTo(Pose2d target) {
         Transform2d v = target.minus(estimator.getEstimatedPosition());
         turnTo(v.getRotation());
-        velocity.calculate(Math.sqrt(Math.pow(v.getX(), 2) + Math.pow(v.getY(), 2)));
     }
 
     public void turnTo(Rotation2d rotation) {
