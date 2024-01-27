@@ -86,6 +86,7 @@ public class Drivetrain extends SubsystemBase {
         A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
         System.out.println(maxV);
 
+        //Gear ratio for 2022 was 10.75:1
         LinearSystem<N2, N2, N2> plant = buildPlant(0.0762, 0.27305, 0.093, 0.093, 5.0, 40.0, 1, 1, 1, 1);
 
         //track width ~20 inch?
@@ -104,7 +105,7 @@ public class Drivetrain extends SubsystemBase {
          *     [ Vr ]
          * 
          * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
-         * J = moment of inertia  m = robot mass
+         * J = moment of inertia  m = robot mass TODO:figure out mass of Omega & current robot
          * Kt = input gain, Kv = system gain
          * R = motor resistance (left/right)
          * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
@@ -165,7 +166,7 @@ public class Drivetrain extends SubsystemBase {
      * @param rSpeed
      */
     public void set(double lSpeed, double rSpeed) {
-        leftFront.set(TalonSRXControlMode.PercentOutput, lSpeed);
+        leftFront.set(TalonSRXControlMode.Current, lSpeed);
         leftBack.set(TalonSRXControlMode.PercentOutput, lSpeed);
         rightFront.set(TalonSRXControlMode.PercentOutput, rSpeed);
         rightBack.set(TalonSRXControlMode.PercentOutput, rSpeed);
@@ -175,10 +176,7 @@ public class Drivetrain extends SubsystemBase {
         DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, new Pose2d(), lSpeed, rSpeed);
         System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
         System.out.println("control: " + v.left + " " + v.right);
-        set(v.left / 2, v.right / 2);
-
-        if ((v.left < 0.5 && v.right < 0.5) || true); {
-        }
+        set(v.left, v.right);
     }
 
     /**
@@ -197,12 +195,6 @@ public class Drivetrain extends SubsystemBase {
     public void goTo(Pose2d target) {
         Transform2d v = target.minus(estimator.getEstimatedPosition());
         turnTo(v.getRotation());
-        /*
-         * Term for velocity
-         * Term for ang. velocity
-         * 
-         */
-
         velocity.calculate(Math.sqrt(Math.pow(v.getX(), 2) + Math.pow(v.getY(), 2)));
     }
 

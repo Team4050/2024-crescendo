@@ -28,7 +28,6 @@ public class TestAuto extends Command {
 
     @Override
     public void initialize() {
-        // TODO Auto-generated method stub
         super.initialize();
         timer = new Timer();
         timer.start();
@@ -42,7 +41,6 @@ public class TestAuto extends Command {
 
     @Override
     public void execute() {
-        // TODO Auto-generated method stub
         DifferentialDriveWheelVoltages d = drive.follow(trajectory, timer.get());
         drive.setControl(1, 1);
         double end = timer.get() + 1;
