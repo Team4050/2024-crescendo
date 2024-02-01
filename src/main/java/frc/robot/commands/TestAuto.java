@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,11 +35,11 @@ public class TestAuto extends Command {
         super.initialize();
         timer = new Timer();
         timer.start();
-        TrajectoryConfig tconfig = new TrajectoryConfig(Units.MetersPerSecond.of(1), Units.MetersPerSecondPerSecond.of(10));
+        TrajectoryConfig tconfig = new TrajectoryConfig(Units.MetersPerSecond.of(0.1), Units.MetersPerSecondPerSecond.of(0.1));
         trajectory = TrajectoryGenerator.generateTrajectory(
             new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
             new ArrayList<Translation2d>(),
-            new Pose2d(3, 3, Rotation2d.fromDegrees(0)),
+            new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
             tconfig);
         end = timer.get() + trajectory.getTotalTimeSeconds();
     }
@@ -46,7 +47,11 @@ public class TestAuto extends Command {
     @Override
     public void execute() {
         DifferentialDriveWheelSpeeds d = drive.follow(trajectory, timer.get());
-        System.out.println("speeds: " + d.leftMetersPerSecond + " " + d.rightMetersPerSecond);
+        State s = trajectory.sample(timer.get());
+        System.out.println(
+            "target: " + s.poseMeters.getX() + " " + s.poseMeters.getY() + " " + s.poseMeters.getRotation().getRadians());
+            // + "\n" +
+            //"speeds: " + d.leftMetersPerSecond + " " + d.rightMetersPerSecond);
     }
 
     @Override

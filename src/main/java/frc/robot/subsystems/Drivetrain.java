@@ -7,6 +7,7 @@ import frc.robot.Constants;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 import frc.robot.hazard.HazardVision;
 
@@ -41,6 +42,7 @@ import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
@@ -53,6 +55,8 @@ public class Drivetrain extends SubsystemBase {
     TalonSRX rightBack;
     TalonSRX leftBack;
 
+    double wheelRadMeters = 0.0762;
+
     private PIDController velocity;
     private PIDController angle;
     private LTVDifferentialDriveController controller;
@@ -63,12 +67,17 @@ public class Drivetrain extends SubsystemBase {
     private DifferentialDrivePoseEstimator estimator;
     private HazardVision vision;
 
+    //1.15 degree drift over 2 and a half minutes
+    private PigeonIMU imu;
+
     private DifferentialDriveKinematics kinematics;
 
     public Drivetrain(Pose2d initial) {
         leftFront = new TalonSRX(Constants.MotorCANValues.leftMotorFront);
+        leftFront.setInverted(true);
         rightFront = new TalonSRX(Constants.MotorCANValues.rightMotorFront);
         leftBack = new TalonSRX(Constants.MotorCANValues.leftMotorRear);
+        leftBack.setInverted(true);
         rightBack = new TalonSRX(Constants.MotorCANValues.rightMotorRear);
         kinematics = new DifferentialDriveKinematics(0.5461);
         estimator = new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
@@ -77,6 +86,8 @@ public class Drivetrain extends SubsystemBase {
         velocity = new PIDController(0, 0, 0);
         angle = new PIDController(0, 0, 0);
         vision = new HazardVision();
+        imu = new PigeonIMU(rightBack);
+        imu.setYaw(0);
         Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
         Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
 
@@ -95,7 +106,7 @@ public class Drivetrain extends SubsystemBase {
         //track width ~20 inch?
         controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
 
-        ramController = new RamseteController(1, 0.5);
+        ramController = new RamseteController(0.2, 0.5);
     }
 
     private LinearSystem<N2, N2, N2> buildPlant(double r, double rb, double Gl, double Gr, double J, double m, double Kt, double Kv, double Rl, double Rr) {
@@ -177,8 +188,23 @@ public class Drivetrain extends SubsystemBase {
         rightBack.set(TalonSRXControlMode.PercentOutput, rSpeed);
     }
 
+    public double[] setVelocity(double lVel, double rVel) {
+        double wheelSpeed = (lVel * 409.6) / (wheelRadMeters * Math.PI * 2);
+        System.out.println("wheel speed target: " + wheelSpeed);
+        leftFront.set(TalonSRXControlMode.Velocity, wheelSpeed);
+        leftBack.set(TalonSRXControlMode.Velocity, wheelSpeed);
+        rightFront.set(TalonSRXControlMode.Velocity, wheelSpeed);
+        rightBack.set(TalonSRXControlMode.Velocity, wheelSpeed);
+
+        double[] r = new double[2];
+        //double gearing = (wheelRadMeters * Math.PI * 2) / (409.6);
+        r[0] = leftFront.getSelectedSensorVelocity(0);// * gearing;
+        r[1] = rightFront.getSelectedSensorVelocity(0);// * gearing;
+        return r;
+    }
+
     public void setControl(double lSpeed, double rSpeed) {
-        DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, new Pose2d(), lSpeed, rSpeed);
+        DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6, new Pose2d(), lSpeed, rSpeed);
         //System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
         //System.out.println("control: " + v.left + " " + v.right);
         set(v.left, v.right);
@@ -207,11 +233,17 @@ public class Drivetrain extends SubsystemBase {
         //angle.calculate(rotation.minus(estimator.getEstimatedPosition().getRotation()).getRadians());
     }
 
+    int loop = 0;
     @Override
     public void periodic() {
         super.periodic();
 
-        estimator.update(new Rotation2d(), new DifferentialDriveWheelPositions(leftFront.getSelectedSensorPosition() * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorPosition() * Math.PI * 0.0762 / 4096));
+        loop++;
+        if (loop > 50) {
+            System.out.println("imu yaw: " + imu.getYaw());
+            loop = 0;
+        }
+        estimator.update(new Rotation2d(imu.getYaw() + Math.toRadians(180)), new DifferentialDriveWheelPositions(leftFront.getSelectedSensorPosition() * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorPosition() * Math.PI * 0.0762 / 4096));
 
         Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
         //System.out.println("periodic");
@@ -225,7 +257,9 @@ public class Drivetrain extends SubsystemBase {
         State p = s.sample(t);
         ChassisSpeeds c = ChassisSpeeds.fromFieldRelativeSpeeds(ramController.calculate(position, p), position.getRotation());
         DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(c);
-        set(speeds.leftMetersPerSecond / 10, speeds.rightMetersPerSecond / 10);
+        System.out.println("target velocities: " + (speeds.leftMetersPerSecond * 409.6) / (wheelRadMeters * Math.PI * 2) + " " + (speeds.rightMetersPerSecond * 409.6) / (wheelRadMeters * Math.PI * 2));
+        double[] measured = setVelocity(-speeds.leftMetersPerSecond, -speeds.rightMetersPerSecond);
+        System.out.println("measured velocities: " + measured[0] + " " + measured[1]);
         //add velocity references
         return speeds;
     }
