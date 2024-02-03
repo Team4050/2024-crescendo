@@ -42,7 +42,7 @@ public class HazardVision {
   private PhotonPoseEstimator poseEstimator;
 
   public HazardVision() {
-    chassis = new PhotonCamera(Constants.Sensors.LimelightName);
+    chassis = null;//new PhotonCamera(Constants.Sensors.LimelightName);
 
     AprilTagFieldLayout fieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     poseEstimator =

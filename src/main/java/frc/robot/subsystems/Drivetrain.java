@@ -7,6 +7,7 @@ import frc.robot.Constants;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 import frc.robot.hazard.HazardVision;
 
@@ -22,6 +23,7 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 import edu.wpi.first.math.controller.LTVDifferentialDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,6 +32,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N5;
@@ -39,37 +42,62 @@ import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
+import edu.wpi.first.wpilibj.motorcontrol.PWMMotorController;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drivetrain extends SubsystemBase {
     /* Motors */
 
-    TalonSRX rightFront;
-    TalonSRX leftFront;
-    TalonSRX rightBack;
-    TalonSRX leftBack;
+    private PWMMotorController left;
+    private PWMMotorController right;
+
+    private double wheelRadMeters = 0.1524;
+    private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
 
     private LTVDifferentialDriveController controller;
+    private RamseteController ramController;
 
     private DifferentialDrive drivetrain;
     private Pose2d position;
     private DifferentialDrivePoseEstimator estimator;
     private HazardVision vision;
 
+    //1.15 degree drift over 2 and a half minutes
+    private ADIS16470_IMU imu;
+
     private DifferentialDriveKinematics kinematics;
 
+    private double kP = 0;
+    private double kI = 0;
+    private double kD = 0;
+    private double kF = 0;
+
+    private PIDController leftControl;
+    private PIDController rightControl;
+
     public Drivetrain(Pose2d initial) {
-        leftFront = new TalonSRX(Constants.MotorCANValues.leftMotorFront);
-        rightFront = new TalonSRX(Constants.MotorCANValues.rightMotorFront);
-        leftBack = new TalonSRX(Constants.MotorCANValues.leftMotorRear);
-        rightBack = new TalonSRX(Constants.MotorCANValues.rightMotorRear);
-        kinematics = new DifferentialDriveKinematics(0.2);
+        left = new PWMSparkMax(Constants.MotorCANValues.leftMotorFront);
+        left.addFollower(new PWMSparkMax(Constants.MotorCANValues.leftMotorRear));
+        right = new PWMSparkMax(Constants.MotorCANValues.rightMotorFront);
+        right.addFollower(new PWMSparkMax(Constants.MotorCANValues.rightMotorRear));
+
+        leftControl = new PIDController(kP, kI, kD);
+        rightControl = new PIDController(kP, kI, kD);
+
+        kinematics = new DifferentialDriveKinematics(0.508);
         estimator = new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
         position = initial;
-        //TODO: tune
         vision = new HazardVision();
+        imu = new ADIS16470_IMU();
+        imu.configCalTime(ADIS16470_IMU.CalibrationTime._128ms);
+        imu.calibrate();
         Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
         Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
 
@@ -87,6 +115,15 @@ public class Drivetrain extends SubsystemBase {
 
         //track width ~20 inch?
         controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
+
+        ramController = new RamseteController(0.2, 0.5);
+    }
+
+    private void configMotor(TalonSRX m) {
+        m.config_kP(0, 0);
+        m.config_kI(0, 0);
+        m.config_kD(0, 0);
+        m.config_kF(0, 0);
     }
 
     private LinearSystem<N2, N2, N2> buildPlant(double r, double rb, double Gl, double Gr, double J, double m, double Kt, double Kv, double Rl, double Rr) {
@@ -162,17 +199,37 @@ public class Drivetrain extends SubsystemBase {
      * @param rSpeed
      */
     public void set(double lSpeed, double rSpeed) {
-        leftFront.set(TalonSRXControlMode.Current, lSpeed);
-        leftBack.set(TalonSRXControlMode.Current, lSpeed);
-        rightFront.set(TalonSRXControlMode.Current, rSpeed);
-        rightBack.set(TalonSRXControlMode.Current, rSpeed);
+        left.set(lSpeed);
+        right.set(rSpeed);
     }
 
+    public double[] setVelocity(double lVel, double rVel) {
+        SmartDashboard.putNumber("Left target:", lVel);
+        SmartDashboard.putNumber("Right target:", rVel);
+        //velocity (m/s) / circumference of wheel * 4096 encoder units per rotation / 10 (u/100ms)
+        double lWheelSpeed = (lVel * 409.6) / wheelCircumMeters;
+        double rWheelSpeed = (rVel * 409.6) / wheelCircumMeters;
+        double gearing = wheelCircumMeters / (409.6);
+
+        //double controlL = left.calculate(left, lWheelSpeed);
+        //double controlR = right.calculate(-rightFront.getSelectedSensorVelocity(), rWheelSpeed);
+        //System.out.println("target: " + lWheelSpeed + " " + rWheelSpeed);
+        //System.out.println("control: " + controlL + " " + controlR);
+
+        //leftFront.set(TalonSRXControlMode.PercentOutput, -0.2);
+        //leftBack.set(TalonSRXControlMode.PercentOutput, -0.2);
+        //rightFront.set(TalonSRXControlMode.PercentOutput, controlR);
+        //rightBack.set(TalonSRXControlMode.Follower, Constants.MotorCANValues.rightMotorFront);
+
+        return null;
+    }
+
+    //DANGER
     public void setControl(double lSpeed, double rSpeed) {
-        DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096, new Pose2d(), lSpeed, rSpeed);
-        System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
-        System.out.println("control: " + v.left + " " + v.right);
-        set(v.left, v.right);
+        //DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(), leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6, rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6, new Pose2d(), lSpeed, rSpeed);
+        //System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
+        //System.out.println("control: " + v.left + " " + v.right);
+        //set(v.left, v.right);
     }
 
     /**
@@ -197,22 +254,43 @@ public class Drivetrain extends SubsystemBase {
         //angle.calculate(rotation.minus(estimator.getEstimatedPosition().getRotation()).getRadians());
     }
 
+    int loop = 0;
     @Override
     public void periodic() {
-        // TODO Auto-generated method stub
         super.periodic();
 
+        loop++;
+        if (loop > 50) {
+            System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
+            loop = 0;
+        }
+        estimator.update(new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)), new DifferentialDriveWheelPositions(null, null));
+
+        /*
         Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
         //System.out.println("periodic");
         if (pose.isPresent()) {
             System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
             position = pose.get().estimatedPose.toPose2d();
-        }
+        }*/
     }
 
-    public DifferentialDriveWheelVoltages follow(Trajectory s, double t) {
+    public DifferentialDriveWheelSpeeds follow(Trajectory s, double t) {
         State p = s.sample(t);
+        ChassisSpeeds c = ChassisSpeeds.fromFieldRelativeSpeeds(ramController.calculate(position, p), position.getRotation());
+        c = new ChassisSpeeds(0.2, 0.2, 0);
+        DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(c);
+        System.out.println(
+            "target velocities: "
+             + (speeds.leftMetersPerSecond * 409.6) / wheelCircumMeters + " "
+             + (speeds.rightMetersPerSecond * 409.6) / wheelCircumMeters + "\n" +
+            "encoder targets: "
+             + speeds.leftMetersPerSecond + " "
+             + speeds.rightMetersPerSecond);
+        double[] measured = setVelocity(speeds.leftMetersPerSecond, speeds.rightMetersPerSecond);
+        System.out.println("measured velocities: " + measured[0] + " " + measured[1] + "\n"
+             + "measured encoder: " + measured[2] + " " + measured[3]);
         //add velocity references
-        return controller.calculate(estimator.getEstimatedPosition(), leftFront.getSelectedSensorVelocity(), rightFront.getSelectedSensorVelocity(), p);
+        return speeds;
     }
 }
