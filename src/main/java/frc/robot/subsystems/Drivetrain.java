@@ -8,6 +8,9 @@ import frc.robot.Constants;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.sensors.PigeonIMU;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.SparkAbsoluteEncoder.Type;
 
 import frc.robot.hazard.HazardVision;
 
@@ -55,11 +58,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Drivetrain extends SubsystemBase {
     /* Motors */
 
-    private PWMMotorController left;
-    private PWMMotorController right;
+    private CANSparkMax leftF;
+    private CANSparkMax leftR;
+    private CANSparkMax rightF;
+    private CANSparkMax rightR;
 
     private double wheelRadMeters = 0.1524;
     private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
+    private double encoderToMeters = 1; //TODO:
 
     private LTVDifferentialDriveController controller;
     private RamseteController ramController;
@@ -83,10 +89,10 @@ public class Drivetrain extends SubsystemBase {
     private PIDController rightControl;
 
     public Drivetrain(Pose2d initial) {
-        left = new PWMSparkMax(Constants.MotorCANValues.leftMotorFront);
-        left.addFollower(new PWMSparkMax(Constants.MotorCANValues.leftMotorRear));
-        right = new PWMSparkMax(Constants.MotorCANValues.rightMotorFront);
-        right.addFollower(new PWMSparkMax(Constants.MotorCANValues.rightMotorRear));
+        leftF = new CANSparkMax(Constants.MotorCANValues.leftMotorFront, MotorType.kBrushless);
+        leftR = new CANSparkMax(Constants.MotorCANValues.leftMotorRear, MotorType.kBrushless);
+        rightF = new CANSparkMax(Constants.MotorCANValues.rightMotorFront, MotorType.kBrushless);
+        rightR = new CANSparkMax(Constants.MotorCANValues.rightMotorRear, MotorType.kBrushless);
 
         leftControl = new PIDController(kP, kI, kD);
         rightControl = new PIDController(kP, kI, kD);
@@ -103,8 +109,6 @@ public class Drivetrain extends SubsystemBase {
 
         Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
         Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
-        Matrix<N2, N2> C = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
-        Matrix<N2, N2> D = MatBuilder.fill(N2.instance, N2.instance, 1, 0, 0, 1);
 
         double maxV =
         A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
@@ -138,7 +142,7 @@ public class Drivetrain extends SubsystemBase {
          *     [ Vr ]
          * 
          * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
-         * J = moment of inertia  m = robot mass TODO:figure out mass of Omega & current robot
+         * J = moment of inertia  m = robot mass TODO:figure out mass of current robot, 80lbs limit
          * Kt = input gain, Kv = system gain
          * R = motor resistance (left/right)
          * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
@@ -199,8 +203,10 @@ public class Drivetrain extends SubsystemBase {
      * @param rSpeed
      */
     public void set(double lSpeed, double rSpeed) {
-        left.set(lSpeed);
-        right.set(rSpeed);
+        leftF.set(lSpeed);
+        leftR.set(lSpeed);
+        rightF.set(rSpeed);
+        rightR.set(rSpeed);
     }
 
     public double[] setVelocity(double lVel, double rVel) {
@@ -264,7 +270,10 @@ public class Drivetrain extends SubsystemBase {
             System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
             loop = 0;
         }
-        estimator.update(new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)), new DifferentialDriveWheelPositions(null, null));
+        estimator.update(new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
+            new DifferentialDriveWheelPositions(
+                leftF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters,
+                rightF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters));
 
         /*
         Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
@@ -287,10 +296,7 @@ public class Drivetrain extends SubsystemBase {
             "encoder targets: "
              + speeds.leftMetersPerSecond + " "
              + speeds.rightMetersPerSecond);
-        double[] measured = setVelocity(speeds.leftMetersPerSecond, speeds.rightMetersPerSecond);
-        System.out.println("measured velocities: " + measured[0] + " " + measured[1] + "\n"
-             + "measured encoder: " + measured[2] + " " + measured[3]);
-        //add velocity references
+        setVelocity(speeds.leftMetersPerSecond, speeds.rightMetersPerSecond);
         return speeds;
     }
 }

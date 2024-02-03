@@ -11,6 +11,7 @@ import frc.robot.subsystems.Drivetrain;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -34,6 +35,7 @@ public class RobotContainer {
   /* Sensors */
 
   /* Misc */
+  private SendableChooser<Command> autoChooser;
 
   /* Controllers */
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -46,6 +48,9 @@ public class RobotContainer {
     //limelight = null;//new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
     drivetrain = new Drivetrain();
+    autoChooser = new SendableChooser<Command>();
+    autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
+    SmartDashboard.putData("Auto chooser", autoChooser);
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
@@ -72,6 +77,8 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new TestAuto(drivetrain);//Autos.exampleAuto(m_exampleSubsystem);
+    Command c = autoChooser.getSelected();
+    autoChooser.close();
+    return c;//Autos.exampleAuto(m_exampleSubsystem);
   }
 }
