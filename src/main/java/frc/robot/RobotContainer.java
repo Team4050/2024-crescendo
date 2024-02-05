@@ -11,6 +11,7 @@ import frc.robot.subsystems.Drivetrain;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -40,6 +41,9 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
+  private final Joystick jLeft = new Joystick(1);
+  private final Joystick jRight = new Joystick(2);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -48,7 +52,7 @@ public class RobotContainer {
     drivetrain = new Drivetrain();
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
-      drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
+      drivetrain.set(jLeft.getY(), jRight.getY());
     }, drivetrain));
   }
 
