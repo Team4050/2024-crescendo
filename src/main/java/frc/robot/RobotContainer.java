@@ -8,6 +8,8 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.TestAuto;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Gun;
+import frc.robot.subsystems.Intake;
 
 import org.photonvision.PhotonCamera;
 
@@ -29,6 +31,8 @@ public class RobotContainer {
 
   /* Subsystems */
   private final Drivetrain drivetrain;
+  private final Intake intake;
+  private final Gun shooter;
 
   /* Commands */
 
@@ -45,12 +49,17 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    //limelight = null;//new PhotonCamera(Constants.Sensors.LimelightName);
+    //limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
     drivetrain = new Drivetrain();
+    intake = null;
+    shooter = null;
+
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
+
     SmartDashboard.putData("Auto chooser", autoChooser);
+    
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());

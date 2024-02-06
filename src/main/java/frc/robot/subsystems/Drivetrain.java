@@ -198,7 +198,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Speed in m/s
+     * Speed in percent output
      * @param lSpeed
      * @param rSpeed
      */
@@ -207,6 +207,18 @@ public class Drivetrain extends SubsystemBase {
         leftR.set(lSpeed);
         rightF.set(rSpeed);
         rightR.set(rSpeed);
+    }
+
+    /**
+     * Set voltage output
+     * @param lV
+     * @param rV
+     */
+    public void setV(double lV, double rV) {
+        leftF.setVoltage(lV);
+        leftR.setVoltage(lV);
+        rightF.setVoltage(rV);
+        rightR.setVoltage(rV);
     }
 
     public double[] setVelocity(double lVel, double rVel) {
@@ -284,19 +296,10 @@ public class Drivetrain extends SubsystemBase {
         }*/
     }
 
-    public DifferentialDriveWheelSpeeds follow(Trajectory s, double t) {
+    public boolean follow(Trajectory s, double t) {
         State p = s.sample(t);
-        ChassisSpeeds c = ChassisSpeeds.fromFieldRelativeSpeeds(ramController.calculate(position, p), position.getRotation());
-        c = new ChassisSpeeds(0.2, 0.2, 0);
-        DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(c);
-        System.out.println(
-            "target velocities: "
-             + (speeds.leftMetersPerSecond * 409.6) / wheelCircumMeters + " "
-             + (speeds.rightMetersPerSecond * 409.6) / wheelCircumMeters + "\n" +
-            "encoder targets: "
-             + speeds.leftMetersPerSecond + " "
-             + speeds.rightMetersPerSecond);
-        setVelocity(speeds.leftMetersPerSecond, speeds.rightMetersPerSecond);
-        return speeds;
+        DifferentialDriveWheelVoltages dv = controller.calculate(position, leftF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters, rightF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters, p);
+        setV(dv.left, dv.right);
+        return controller.atReference();
     }
 }

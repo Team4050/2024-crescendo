@@ -2,6 +2,9 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * Not yet :(
+ */
 public class Climber extends SubsystemBase {
     
     /* Climber can't extend again after retracting */
@@ -11,13 +14,13 @@ public class Climber extends SubsystemBase {
         
     }
 
-    public void Extend() {
+    public void extend() {
         if (extended) return;
 
         extended = true;
     }
 
-    public void Retract() {
+    public void retract() {
 
     }
 }

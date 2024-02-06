@@ -6,20 +6,22 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gun extends SubsystemBase {
     /* */
-
-    private boolean state = false;
+    private CANSparkMax shooter;
 
     Gun() {
-
+        /* TODO: shooter motor declaration */
     }
 
     @Override
     public void periodic() {
-        // TODO Auto-generated method stub
         super.periodic();
     }
 
-    public boolean state(boolean newState) {
-        return state;
+    /**
+     * Set the speed of the shooter motor
+     * @param speed Output percentage -1.0 - 1.0
+     */
+    public void fire(double speed) {
+        shooter.set(speed);
     }
 }

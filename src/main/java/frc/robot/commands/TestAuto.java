@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.Drivetrain;
 import java.util.HashSet;
 
+/**
+ * Auto for testing autonomous movement methods
+ */
 public class TestAuto extends Command {
     private Drivetrain drive;
     private Timer timer;
@@ -46,7 +49,7 @@ public class TestAuto extends Command {
 
     @Override
     public void execute() {
-        DifferentialDriveWheelSpeeds d = drive.follow(trajectory, timer.get());
+        drive.follow(trajectory, timer.get());
         State s = trajectory.sample(timer.get());
         System.out.println(
             "target: " + s.poseMeters.getX() + " " + s.poseMeters.getY() + " " + s.poseMeters.getRotation().getRadians());
