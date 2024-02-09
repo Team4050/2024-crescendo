@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-vsliveshare.vsliveshare",
+    "esbenp.prettier-vscode",
+    "richardwillis.vscode-spotless-gradle",
+    "mhutchie.git-graph"
+  ]
+}
