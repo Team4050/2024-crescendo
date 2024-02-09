@@ -8,7 +8,7 @@ public class Gun extends SubsystemBase {
     /* */
     private CANSparkMax shooter;
 
-    Gun() {
+    public Gun() {
         /* TODO: shooter motor declaration */
     }
 

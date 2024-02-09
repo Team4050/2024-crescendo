@@ -9,6 +9,9 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 
@@ -57,27 +60,34 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drivetrain extends SubsystemBase {
     /* Motors */
-
     private CANSparkMax leftF;
     private CANSparkMax leftR;
     private CANSparkMax rightF;
     private CANSparkMax rightR;
 
-    private double wheelRadMeters = 0.1524;
-    private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
-    private double encoderToMeters = 1; //TODO:
+    private SparkPIDController leftPID;
+    private SparkPIDController rightPID;
 
+    /* Controls */
     private LTVDifferentialDriveController controller;
     private RamseteController ramController;
 
     private DifferentialDrive drivetrain;
     private Pose2d position;
     private DifferentialDrivePoseEstimator estimator;
-    private HazardVision vision;
 
+    private SparkPIDController leftControl;
+    private SparkPIDController rightControl;
+
+    /* Sensors */
+    private HazardVision vision;
     //1.15 degree drift over 2 and a half minutes
     private ADIS16470_IMU imu;
 
+    /* Constants */
+    private double wheelRadMeters = 0.1524;
+    private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
+    private double encoderToMeters = 1; //TODO:
     private DifferentialDriveKinematics kinematics;
 
     private double kP = 0;
@@ -85,17 +95,19 @@ public class Drivetrain extends SubsystemBase {
     private double kD = 0;
     private double kF = 0;
 
-    private PIDController leftControl;
-    private PIDController rightControl;
-
     public Drivetrain(Pose2d initial) {
         leftF = new CANSparkMax(Constants.MotorCANValues.leftMotorFront, MotorType.kBrushless);
         leftR = new CANSparkMax(Constants.MotorCANValues.leftMotorRear, MotorType.kBrushless);
         rightF = new CANSparkMax(Constants.MotorCANValues.rightMotorFront, MotorType.kBrushless);
         rightR = new CANSparkMax(Constants.MotorCANValues.rightMotorRear, MotorType.kBrushless);
 
-        leftControl = new PIDController(kP, kI, kD);
-        rightControl = new PIDController(kP, kI, kD);
+        leftControl = leftF.getPIDController();
+        rightControl = rightF.getPIDController();
+
+        leftControl.setP(kP);
+        leftControl.setI(kI);
+        leftControl.setD(kD);
+        leftControl.setFF(kF);
 
         kinematics = new DifferentialDriveKinematics(0.508);
         estimator = new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
@@ -142,7 +154,7 @@ public class Drivetrain extends SubsystemBase {
          *     [ Vr ]
          * 
          * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
-         * J = moment of inertia  m = robot mass TODO:figure out mass of current robot, 80lbs limit
+         * J = moment of inertia  m = robot mass TODO:figure out mass of current robot, 80lbs limit, 36.28736kg
          * Kt = input gain, Kv = system gain
          * R = motor resistance (left/right)
          * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
@@ -257,19 +269,6 @@ public class Drivetrain extends SubsystemBase {
      */
     public void align(Translation2d point, double distance) {
         
-    }
-
-    /**
-     * Tells the robot to go to a point on the field
-     * @param target
-     */
-    public void goTo(Pose2d target) {
-        Transform2d v = target.minus(estimator.getEstimatedPosition());
-        turnTo(v.getRotation());
-    }
-
-    public void turnTo(Rotation2d rotation) {
-        //angle.calculate(rotation.minus(estimator.getEstimatedPosition().getRotation()).getRadians());
     }
 
     int loop = 0;

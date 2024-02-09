@@ -10,7 +10,7 @@ public class Climber extends SubsystemBase {
     /* Climber can't extend again after retracting */
     public boolean extended = false;
 
-    Climber() {
+    public Climber() {
         
     }
 
