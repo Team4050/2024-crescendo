@@ -66,7 +66,7 @@ public class RobotContainer {
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
 
-    Shuffleboard.getTab("drive").add(camera);
+    //Shuffleboard.getTab("drive").add(camera);
     //SmartDashboard.putData("Auto chooser", autoChooser);
     //camera.enumerateSinks();
     //SmartDashboard.putData(camera);
