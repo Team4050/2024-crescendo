@@ -63,6 +63,13 @@ public class RobotContainer {
               drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
             },
             drivetrain));
+    intake.setDefaultCommand(
+      new RunCommand(
+        () -> {
+          intake.setIntake(m_driverController.a().getAsBoolean());
+        },
+        intake)
+    );
   }
 
   /**
