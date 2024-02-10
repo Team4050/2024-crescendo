@@ -2,25 +2,19 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/**
- * Not yet :(
- */
+/** Not yet :( */
 public class Climber extends SubsystemBase {
-    
-    /* Climber can't extend again after retracting */
-    public boolean extended = false;
 
-    public Climber() {
-        
-    }
+  /* Climber can't extend again after retracting */
+  public boolean extended = false;
 
-    public void extend() {
-        if (extended) return;
+  public Climber() {}
 
-        extended = true;
-    }
+  public void extend() {
+    if (extended) return;
 
-    public void retract() {
+    extended = true;
+  }
 
-    }
+  public void retract() {}
 }
