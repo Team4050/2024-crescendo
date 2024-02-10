@@ -22,6 +22,8 @@ import java.util.Optional;
 import org.opencv.core.RotatedRect;
 import org.photonvision.EstimatedRobotPose;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;

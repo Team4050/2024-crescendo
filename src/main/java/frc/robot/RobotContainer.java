@@ -7,12 +7,16 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.TestAuto;
+import frc.robot.hazard.HazardCamera;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Gun;
 import frc.robot.subsystems.Intake;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,6 +41,8 @@ public class RobotContainer {
   /* Commands */
 
   /* Sensors */
+  private final HazardCamera intakeCam;
+  private final UsbCamera camera = CameraServer.startAutomaticCapture();
 
   /* Misc */
   private SendableChooser<Command> autoChooser;
@@ -50,20 +56,25 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     //limelight = new PhotonCamera(Constants.Sensors.LimelightName);
-    SmartDashboard.putNumber("test", 1);
-    drivetrain = new Drivetrain();
+    //SmartDashboard.putNumber("test", 1);
+    drivetrain = null;
     intake = null;
     shooter = null;
+
+    intakeCam = new HazardCamera();
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
 
-    SmartDashboard.putData("Auto chooser", autoChooser);
-    
+    Shuffleboard.getTab("drive").add(camera);
+    //SmartDashboard.putData("Auto chooser", autoChooser);
+    //camera.enumerateSinks();
+    //SmartDashboard.putData(camera);
+
     configureBindings();
-    drivetrain.setDefaultCommand(new RunCommand(() -> {
+    /*drivetrain.setDefaultCommand(new RunCommand(() -> {
       drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
-    }, drivetrain));
+    }, drivetrain));*/
   }
 
   /**
@@ -89,5 +100,9 @@ public class RobotContainer {
     Command c = autoChooser.getSelected();
     autoChooser.close();
     return c;//Autos.exampleAuto(m_exampleSubsystem);
+  }
+
+  public void periodic() {
+    intakeCam.getPosition();
   }
 }
