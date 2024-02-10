@@ -4,21 +4,17 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.TestAuto;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Gun;
-import frc.robot.subsystems.Intake;
-
-import org.photonvision.PhotonCamera;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.TestAuto;
+import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Gun;
+import frc.robot.subsystems.Intake;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -49,7 +45,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    //limelight = new PhotonCamera(Constants.Sensors.LimelightName);
+    // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
     drivetrain = new Drivetrain();
     intake = new Intake();
@@ -59,11 +55,14 @@ public class RobotContainer {
     autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
-    
+
     configureBindings();
-    drivetrain.setDefaultCommand(new RunCommand(() -> {
-      drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
-    }, drivetrain));
+    drivetrain.setDefaultCommand(
+        new RunCommand(
+            () -> {
+              drivetrain.set(m_driverController.getLeftY(), m_driverController.getRightY());
+            },
+            drivetrain));
   }
 
   /**
@@ -75,9 +74,7 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
-
-  }
+  private void configureBindings() {}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -88,6 +85,6 @@ public class RobotContainer {
     // An example command will be run in autonomous
     Command c = autoChooser.getSelected();
     autoChooser.close();
-    return c;//Autos.exampleAuto(m_exampleSubsystem);
+    return c; // Autos.exampleAuto(m_exampleSubsystem);
   }
 }
