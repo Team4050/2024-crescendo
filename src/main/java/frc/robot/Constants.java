@@ -22,17 +22,17 @@ public final class Constants {
 
   public static class MotorCANValues {
     //All motors are Talon SRX
-    public static final int leftMotorFront = 1;
-    public static final int leftMotorRear = 2;
+    public static final int leftMotorFront = 2;
+    public static final int leftMotorRear = 1;
     public static final int rightMotorFront = 3;
     public static final int rightMotorRear = 4;
 
     public static final int leftClimber = 1;
     public static final int rightClimber = 1;
 
-    public static final int shooterWheel = 5;
+    public static final int shooterWheel = 6;
 
-    public static final int intake = 6;
+    public static final int intake = 5;
     public static final int conveyor = 7;
   };
 

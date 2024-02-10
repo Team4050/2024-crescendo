@@ -52,7 +52,7 @@ public class RobotContainer {
     //limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
     drivetrain = new Drivetrain();
-    intake = null;
+    intake = new Intake();
     shooter = null;
 
     autoChooser = new SendableChooser<Command>();

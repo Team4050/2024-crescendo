@@ -65,9 +65,6 @@ public class Drivetrain extends SubsystemBase {
     private CANSparkMax rightF;
     private CANSparkMax rightR;
 
-    private SparkPIDController leftPID;
-    private SparkPIDController rightPID;
-
     /* Controls */
     private LTVDifferentialDriveController controller;
     private RamseteController ramController;
