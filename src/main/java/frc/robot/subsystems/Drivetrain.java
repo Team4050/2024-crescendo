@@ -5,6 +5,8 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.IdleMode;
+
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -28,6 +30,7 @@ import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.hazard.HazardVision;
@@ -73,6 +76,16 @@ public class Drivetrain extends SubsystemBase {
     leftR = new CANSparkMax(Constants.MotorCANValues.leftMotorRear, MotorType.kBrushless);
     rightF = new CANSparkMax(Constants.MotorCANValues.rightMotorFront, MotorType.kBrushless);
     rightR = new CANSparkMax(Constants.MotorCANValues.rightMotorRear, MotorType.kBrushless);
+
+    leftR.follow(leftF);
+    rightR.follow(rightF);
+
+    leftF.setInverted(true);
+
+    leftF.setIdleMode(IdleMode.kBrake);
+    leftR.setIdleMode(IdleMode.kBrake);
+    rightF.setIdleMode(IdleMode.kBrake);
+    rightR.setIdleMode(IdleMode.kBrake);
 
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
@@ -200,9 +213,9 @@ public class Drivetrain extends SubsystemBase {
    */
   public void set(double lSpeed, double rSpeed) {
     leftF.set(lSpeed);
-    leftR.set(lSpeed);
+    // leftR.set(lSpeed);
     rightF.set(rSpeed);
-    rightR.set(rSpeed);
+    // rightR.set(rSpeed);
   }
 
   /**
