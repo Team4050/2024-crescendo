@@ -78,7 +78,7 @@ public class RobotContainer {
       () -> {
         double f = m_driverController.getLeftY();
         double t = -m_driverController.getRightX();
-        drivetrain.set((f + t) / 1.5, -(f - t) / 1.5);
+        drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
     drivetrainTank = new RunCommand(
@@ -90,7 +90,7 @@ public class RobotContainer {
       () -> {
         double f = m_driverController.getLeftY();
         double t = -m_driverController.getLeftX();
-        drivetrain.set((f + t) / 1.5, -(f - t) / 1.5);
+        drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
     
@@ -98,7 +98,7 @@ public class RobotContainer {
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
     driveControlChooser.addOption("Tank control scheme", drivetrainTank);
-    SmartDashboard.putData(driveControlChooser);
+    SmartDashboard.putData("Drive control chooser", driveControlChooser);
 
     drivetrain.setDefaultCommand(drivetrainDefault);
     /*intake.setDefaultCommand(
