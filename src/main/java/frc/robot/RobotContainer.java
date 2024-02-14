@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -13,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlignShooter;
 import frc.robot.commands.TestAuto;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
@@ -56,7 +59,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
-    drivetrain = new Drivetrain();
+    drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
     shooter = null;
 
@@ -133,6 +136,7 @@ public class RobotContainer {
     // An example command will be run in autonomous
     Command c = autoChooser.getSelected();
     autoChooser.close();
+    c = new AlignShooter(drivetrain);
     return c; // Autos.exampleAuto(m_exampleSubsystem);
   }
 }
