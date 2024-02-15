@@ -101,12 +101,12 @@ public class RobotContainer {
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
 
     drivetrain.setDefaultCommand(drivetrainDefault);
-    /*intake.setDefaultCommand(
+    intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(m_driverController.a().getAsBoolean());
+              intake.setIntake(m_driverController.rightTrigger().getAsBoolean(), m_driverController.b().getAsBoolean());
             },
-            intake));*/
+            intake));
   }
 
   /**

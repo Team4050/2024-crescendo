@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,12 +22,13 @@ public class Intake extends SubsystemBase {
   public Intake() {
     /* TODO: intake and conveyor declaration */
     intake = new CANSparkMax(Constants.MotorCANValues.intake, MotorType.kBrushless);
+    intake.setIdleMode(IdleMode.kCoast);
     // ultrasonic = new Ultrasonic(0, 1);
     conveyor = null;
     controller = intake.getPIDController();
     controller.setP(0.2);
-    controller.setI(0);
-    controller.setD(0);
+    controller.setI(0.01);
+    controller.setD(0.1);
   }
 
   /**
@@ -34,14 +36,17 @@ public class Intake extends SubsystemBase {
    *
    * @param state
    */
-  public void setIntake(boolean state) {
+  public void setIntake(boolean state, boolean two) {
     this.state = state;
     if (state) {
       //intake.set(Constants.MotorDriveValues.intakeSpeed);
-      controller.setReference(2048, ControlType.kVelocity);
+      controller.setReference(-0.5, ControlType.kDutyCycle);
+      return;
+    } else if (two) {
+      controller.setReference(0.5, ControlType.kDutyCycle);
       return;
     }
-    controller.setReference(0, ControlType.kVelocity);
+    controller.setReference(0, ControlType.kDutyCycle);
     //intake.set(0);
   }
 
