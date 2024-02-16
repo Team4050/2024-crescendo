@@ -77,7 +77,7 @@ public class RobotContainer {
     drivetrainDefault = new RunCommand(
       () -> {
         double f = m_driverController.getLeftY();
-        double t = -m_driverController.getRightX(0.01f);
+        double t = -m_driverController.getRightX(0.04f);
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
@@ -89,7 +89,7 @@ public class RobotContainer {
     drivetrainArcade1Stick = new RunCommand(
       () -> {
         double f = m_driverController.getLeftY();
-        double t = -m_driverController.getLeftX(0.01f);
+        double t = -m_driverController.getLeftX(0.04f);
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
