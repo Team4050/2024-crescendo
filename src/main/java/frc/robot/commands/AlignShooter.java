@@ -1,6 +1,10 @@
 package frc.robot.commands;
 
+import java.io.Console;
 import java.util.ArrayList;
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -51,6 +55,29 @@ public class AlignShooter extends Command {
     @Override
     public void execute() {
         drivetrain.follow(s, t.get());
+    }
+
+    private void alignManual() {
+        Optional<EstimatedRobotPose> visionEstimation = drivetrain.getRawCameraDetection();
+        if (visionEstimation.isPresent()) {
+            Translation2d dif = speakerLocation.getTranslation().minus(visionEstimation.get().estimatedPose.toPose2d().getTranslation());
+            //Normalize
+            dif = dif.times(1 / dif.getNorm());
+            Rotation2d rotation = new Rotation2d(
+                -dif.getX(),
+                -dif.getY());
+            Pose2d p = new Pose2d(
+                //Scale difference norm by desired length
+                speakerLocation.getTranslation().plus(dif.times(distMeters)), 
+                //Rotation is inverse of distance norm
+                new Rotation2d(
+                    -dif.getX(),
+                    -dif.getY()));
+            //2 degrees tolerance
+            if (Math.abs(visionEstimation.get().estimatedPose.toPose2d().getRotation().minus(rotation).getDegrees()) < 2.0 && dif.getNorm() > distMeters) {
+                drivetrain.set(0.2, 0.2);
+            }
+        }
     }
 
     @Override

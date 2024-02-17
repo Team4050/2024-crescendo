@@ -72,7 +72,7 @@ public class Drivetrain extends SubsystemBase {
   private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
   private double gearRatio = 8.46;
   private double encoderToMeters = wheelCircumMeters / (42 * gearRatio); // TODO:
-  private DifferentialDriveKinematics kinematics;
+  public DifferentialDriveKinematics kinematics;
 
   //
   private double kP = 0.001;
@@ -106,8 +106,6 @@ public class Drivetrain extends SubsystemBase {
 
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
-
-    //ramController = new RamseteController(1, 0.5);
 
     leftControl.setP(kP);
     leftControl.setI(kI);
@@ -264,6 +262,10 @@ public class Drivetrain extends SubsystemBase {
    * @param distance
    */
   public void align(Translation2d point, double distance) {}
+
+  public Optional<EstimatedRobotPose> getRawCameraDetection() {
+    return vision.getEstimatedGlobalPose(position);
+  }
 
   int loop = 0;
 
