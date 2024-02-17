@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -55,6 +57,8 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d position;
   private DifferentialDrivePoseEstimator estimator;
 
+  private RelativeEncoder leftEncoder;
+  private RelativeEncoder rightEncoder;
   private SparkPIDController leftControl;
   private SparkPIDController rightControl;
 
@@ -66,14 +70,15 @@ public class Drivetrain extends SubsystemBase {
   /* Constants */
   private double wheelRadMeters = 0.1524;
   private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
-  private double encoderToMeters = wheelCircumMeters / 42; // TODO:
   private double gearRatio = 8.46;
+  private double encoderToMeters = wheelCircumMeters / (42 * gearRatio); // TODO:
   private DifferentialDriveKinematics kinematics;
 
-  private double kP = 0;
-  private double kI = 0;
-  private double kD = 0;
-  private double kF = 0;
+  //
+  private double kP = 0.001;
+  private double kI = 0.000001;
+  private double kD = 0.0005;
+  private double kF = 0.003;
 
   public Drivetrain(Pose2d initial) {
     leftF = new CANSparkMax(Constants.MotorCANValues.leftMotorFront, MotorType.kBrushless);
@@ -84,22 +89,35 @@ public class Drivetrain extends SubsystemBase {
     leftR.follow(leftF);
     rightR.follow(rightF);
 
-    leftF.setInverted(true);
+    rightF.setInverted(true);
+    leftF.setInverted(false);
 
     leftF.setIdleMode(IdleMode.kBrake);
     leftR.setIdleMode(IdleMode.kBrake);
     rightF.setIdleMode(IdleMode.kBrake);
     rightR.setIdleMode(IdleMode.kBrake);
 
+    leftEncoder = leftF.getEncoder();
+    rightEncoder = rightF.getEncoder();
+
+    //leftEncoder = leftF.getAlternateEncoder()
+
+    System.out.println("Conversion factor:" + leftEncoder.getVelocityConversionFactor());
+
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
 
-    ramController = new RamseteController(1, 0.5);
+    //ramController = new RamseteController(1, 0.5);
 
     leftControl.setP(kP);
     leftControl.setI(kI);
     leftControl.setD(kD);
     leftControl.setFF(kF);
+
+    rightControl.setP(kP);
+    rightControl.setI(kI);
+    rightControl.setD(kD);
+    rightControl.setFF(kF);
 
     kinematics = new DifferentialDriveKinematics(0.508);
     estimator =
@@ -125,7 +143,8 @@ public class Drivetrain extends SubsystemBase {
     // track width ~20 inch?
     controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
 
-    ramController = new RamseteController(0.5, 0.2);
+    //Ramsete controller tuning for meters is 2.0 & 0.7 https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/ramsete.html
+    ramController = new RamseteController(1.5, 0.9);
   }
 
   private void configMotor(TalonSRX m) {
@@ -224,55 +243,18 @@ public class Drivetrain extends SubsystemBase {
     // rightR.set(rSpeed);
   }
 
-  /**
-   * Set voltage output
-   *
-   * @param lV
-   * @param rV
-   */
-  public void setV(double lV, double rV) {
-    leftF.setVoltage(lV);
-    leftR.setVoltage(lV);
-    rightF.setVoltage(rV);
-    rightR.setVoltage(rV);
-  }
-
   public double[] setVelocity(double lVel, double rVel) {
     SmartDashboard.putNumber("Left target:", lVel);
     SmartDashboard.putNumber("Right target:", rVel);
-    // velocity (m/s) / circumference of wheel * 4096 encoder units per rotation / 10 (u/100ms)
-    double lEncoderSpeed = (lVel * gearRatio * 42) / wheelCircumMeters;
-    double rEncoderSpeed = (rVel * gearRatio * 42) / wheelCircumMeters;
-    double gearing = wheelCircumMeters;
 
-    System.out.println(lEncoderSpeed + " " + rEncoderSpeed);
+    double lEncoderSpeed = lVel / encoderToMeters;
+    double rEncoderSpeed = rVel / encoderToMeters;
 
     leftControl.setReference(lEncoderSpeed, ControlType.kVelocity);
-    rightControl.setReference(lEncoderSpeed, ControlType.kVelocity);
-
-    // double controlL = left.calculate(left, lWheelSpeed);
-    // double controlR = right.calculate(-rightFront.getSelectedSensorVelocity(), rWheelSpeed);
-    // System.out.println("target: " + lWheelSpeed + " " + rWheelSpeed);
-    // System.out.println("control: " + controlL + " " + controlR);
-
-    // leftFront.set(TalonSRXControlMode.PercentOutput, -0.2);
-    // leftBack.set(TalonSRXControlMode.PercentOutput, -0.2);
-    // rightFront.set(TalonSRXControlMode.PercentOutput, controlR);
-    // rightBack.set(TalonSRXControlMode.Follower, Constants.MotorCANValues.rightMotorFront);
-
+    rightControl.setReference(rEncoderSpeed, ControlType.kVelocity);
+    System.out.println("Target encoder speeds:" + lEncoderSpeed + " " + rEncoderSpeed);
+    System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " + rightEncoder.getVelocity());
     return null;
-  }
-
-  // DANGER
-  public void setControl(double lSpeed, double rSpeed) {
-    // DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(),
-    // leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6,
-    // rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6, new Pose2d(), lSpeed,
-    // rSpeed);
-    // System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762
-    // / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
-    // System.out.println("control: " + v.left + " " + v.right);
-    // set(v.left, v.right);
   }
 
   /**
@@ -297,8 +279,8 @@ public class Drivetrain extends SubsystemBase {
     estimator.update(
         new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
         new DifferentialDriveWheelPositions(
-            leftF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters,
-            rightF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters));
+            leftEncoder.getPosition() * encoderToMeters,
+            rightEncoder.getPosition() * encoderToMeters));
 
     /*
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
@@ -311,17 +293,12 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
-    System.out.println(p.poseMeters + " " + position + " ");
-    DifferentialDriveWheelVoltages dv =
-        controller.calculate(
-            position,
-            leftF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
-            rightF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
-            p);
+    System.out.println("pose:" + p.poseMeters + " " + position);
+    
     ChassisSpeeds speeds = ramController.calculate(position, p);
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+
     setVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
-    //setV(dv.left, dv.right);
     return controller.atReference();
   }
 }
