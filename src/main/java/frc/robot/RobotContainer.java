@@ -108,6 +108,7 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               intake.setIntake(m_driverController.rightTrigger().getAsBoolean(), m_driverController.b().getAsBoolean());
+              intake.setConveyor(m_driverController.leftTrigger().getAsBoolean());
             },
             intake));
   }
