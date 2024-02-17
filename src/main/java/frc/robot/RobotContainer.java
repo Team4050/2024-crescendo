@@ -67,29 +67,23 @@ public class RobotContainer {
     Constraints c = new Constraints(1, 0.5);
     controlProfile = new TrapezoidProfile(c);
     configureBindings();
-    drivetrain.setDefaultCommand(
-        new RunCommand(
-            () -> {
-              drivetrain.set(Math.log(m_driverController.getLeftY() + Math.E) - 1, -(Math.log(m_driverController.getRightY() + Math.E) - 1));
-            },
-            drivetrain));
 
     drivetrainDefault = new RunCommand(
       () -> {
-        double f = m_driverController.getLeftY();
-        double t = -m_driverController.getRightX(0.04f);
+        double f = -m_driverController.getLeftY();
+        double t = m_driverController.getRightX(0.04f);
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
     drivetrainTank = new RunCommand(
       () -> {
-        drivetrain.set(Math.log(m_driverController.getLeftY() + Math.E) - 1, -(Math.log(m_driverController.getRightY() + Math.E) - 1));
+        drivetrain.set(Math.log(-m_driverController.getLeftY() + Math.E) - 1, (Math.log(m_driverController.getRightY() + Math.E) - 1));
       },
       drivetrain);
     drivetrainArcade1Stick = new RunCommand(
       () -> {
-        double f = m_driverController.getLeftY();
-        double t = -m_driverController.getLeftX(0.04f);
+        double f = -m_driverController.getLeftY();
+        double t = m_driverController.getLeftX(0.04f);
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
