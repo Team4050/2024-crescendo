@@ -134,9 +134,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    Command c = autoChooser.getSelected();
-    autoChooser.close();
-    c = new AlignShooter(drivetrain);
+    Command c;// = autoChooser.getSelected();
+    //autoChooser.close();
+    c = new TestAuto(drivetrain);
     return c; // Autos.exampleAuto(m_exampleSubsystem);
   }
 }
