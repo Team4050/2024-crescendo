@@ -17,13 +17,13 @@ public class IntakeNote extends Command {
 
   @Override
   public void execute() {
-    intake.setIntake(true);
+    intake.setIntake(true, false);
     intake.setConveyor(true);
 
     // TODO: better logic & determine target distance
     while (intake.get() > 40) {}
 
-    intake.setIntake(false);
+    intake.setIntake(false, false);
     intake.setConveyor(false);
     super.execute();
   }

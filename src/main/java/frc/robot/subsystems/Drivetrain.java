@@ -5,6 +5,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.MatBuilder;
@@ -18,8 +19,10 @@ import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N5;
 // import edu.wpi.first.math.proto.System;
@@ -64,6 +67,7 @@ public class Drivetrain extends SubsystemBase {
   private double wheelRadMeters = 0.1524;
   private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
   private double encoderToMeters = wheelCircumMeters / 42; // TODO:
+  private double gearRatio = 8.46;
   private DifferentialDriveKinematics kinematics;
 
   private double kP = 0;
@@ -89,6 +93,8 @@ public class Drivetrain extends SubsystemBase {
 
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
+
+    ramController = new RamseteController(1, 0.5);
 
     leftControl.setP(kP);
     leftControl.setI(kI);
@@ -235,9 +241,14 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Left target:", lVel);
     SmartDashboard.putNumber("Right target:", rVel);
     // velocity (m/s) / circumference of wheel * 4096 encoder units per rotation / 10 (u/100ms)
-    double lWheelSpeed = (lVel * 409.6) / wheelCircumMeters;
-    double rWheelSpeed = (rVel * 409.6) / wheelCircumMeters;
-    double gearing = wheelCircumMeters / (409.6);
+    double lEncoderSpeed = (lVel * gearRatio * 42) / wheelCircumMeters;
+    double rEncoderSpeed = (rVel * gearRatio * 42) / wheelCircumMeters;
+    double gearing = wheelCircumMeters;
+
+    System.out.println(lEncoderSpeed + " " + rEncoderSpeed);
+
+    leftControl.setReference(lEncoderSpeed, ControlType.kVelocity);
+    rightControl.setReference(lEncoderSpeed, ControlType.kVelocity);
 
     // double controlL = left.calculate(left, lWheelSpeed);
     // double controlR = right.calculate(-rightFront.getSelectedSensorVelocity(), rWheelSpeed);
@@ -307,7 +318,10 @@ public class Drivetrain extends SubsystemBase {
             leftF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
             rightF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
             p);
-    setV(dv.left, dv.right);
+    ChassisSpeeds speeds = ramController.calculate(position, p);
+    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+    setVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
+    //setV(dv.left, dv.right);
     return controller.atReference();
   }
 }
