@@ -80,7 +80,7 @@ public class RobotContainer {
     drivetrainDefault = new RunCommand(
       () -> {
         double f = m_driverController.getLeftY();
-        double t = -m_driverController.getRightX();
+        double t = -m_driverController.getRightX(0.04f);
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
@@ -92,7 +92,7 @@ public class RobotContainer {
     drivetrainArcade1Stick = new RunCommand(
       () -> {
         double f = m_driverController.getLeftY();
-        double t = -m_driverController.getLeftX();
+        double t = -m_driverController.getLeftX(0.04f);
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
@@ -104,12 +104,12 @@ public class RobotContainer {
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
 
     drivetrain.setDefaultCommand(drivetrainDefault);
-    /*intake.setDefaultCommand(
+    intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(m_driverController.a().getAsBoolean());
+              intake.setIntake(m_driverController.rightTrigger().getAsBoolean(), m_driverController.b().getAsBoolean());
             },
-            intake));*/
+            intake));
   }
 
   /**
