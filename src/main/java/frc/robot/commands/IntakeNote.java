@@ -21,7 +21,7 @@ public class IntakeNote extends Command {
     intake.setConveyor(true);
 
     // TODO: better logic & determine target distance
-    while (intake.get() > 40) {}
+    while (!intake.get()) {}
 
     intake.setIntake(false);
     intake.setConveyor(false);

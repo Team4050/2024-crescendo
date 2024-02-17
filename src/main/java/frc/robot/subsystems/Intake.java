@@ -4,6 +4,8 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -12,11 +14,13 @@ public class Intake extends SubsystemBase {
   private boolean state = false;
   private CANSparkMax intake;
   private TalonSRX conveyor;
-  private Ultrasonic ultrasonic;
+  //private Ultrasonic ultrasonic;
+  private DigitalInput breakbeam;
 
   public Intake() {
     /* TODO: intake and conveyor declaration */
     intake = new CANSparkMax(Constants.MotorCANValues.intake, MotorType.kBrushless);
+    breakbeam = new DigitalInput(0);
     // ultrasonic = new Ultrasonic(0, 1);
     conveyor = null;
   }
@@ -53,7 +57,7 @@ public class Intake extends SubsystemBase {
    *
    * @return
    */
-  public double get() {
-    return ultrasonic.getRangeMM();
+  public boolean get() {
+    return breakbeam.get();
   }
 }
