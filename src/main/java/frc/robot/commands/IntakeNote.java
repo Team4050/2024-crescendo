@@ -25,6 +25,7 @@ public class IntakeNote extends Command {
 
     intake.setIntake(false, false);
     intake.setConveyor(false);
+
     super.execute();
   }
 }
