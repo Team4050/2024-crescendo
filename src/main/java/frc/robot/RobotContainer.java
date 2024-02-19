@@ -53,6 +53,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final HazardXbox m_driverController =
       new HazardXbox(OperatorConstants.kDriverControllerPort);
+  private final HazardXbox m_secondaryController = 
+      new HazardXbox(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -70,12 +72,6 @@ public class RobotContainer {
     Constraints c = new Constraints(1, 0.5);
     controlProfile = new TrapezoidProfile(c);
     configureBindings();
-    drivetrain.setDefaultCommand(
-        new RunCommand(
-            () -> {
-              drivetrain.set(Math.log(m_driverController.getLeftY() + Math.E) - 1, -(Math.log(m_driverController.getRightY() + Math.E) - 1));
-            },
-            drivetrain));
 
     drivetrainDefault = new RunCommand(
       () -> {
@@ -108,7 +104,7 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               intake.setIntake(m_driverController.rightTrigger().getAsBoolean(), m_driverController.b().getAsBoolean());
-              intake.setConveyor(m_driverController.leftTrigger().getAsBoolean());
+              intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
   }

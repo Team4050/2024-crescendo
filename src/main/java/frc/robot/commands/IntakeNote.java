@@ -7,6 +7,7 @@ import frc.robot.subsystems.Intake;
 public class IntakeNote extends Command {
   private Gun gun;
   private Intake intake;
+  private double conveyorSpeed = -1.0;
 
   @Override
   public void initialize() {
@@ -18,13 +19,13 @@ public class IntakeNote extends Command {
   @Override
   public void execute() {
     intake.setIntake(true, false);
-    intake.setConveyor(true);
+    intake.setConveyor(conveyorSpeed);
 
     // TODO: better logic & determine target distance
     while (!intake.get()) {}
 
     intake.setIntake(false, false);
-    intake.setConveyor(false);
+    intake.setConveyor(0);
 
     super.execute();
   }
