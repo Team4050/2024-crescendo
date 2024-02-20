@@ -104,7 +104,7 @@ public class RobotContainer {
     intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(m_driverController.rightTrigger().getAsBoolean(), m_driverController.b().getAsBoolean());
+              intake.setIntake(m_secondaryController.rightTrigger().getAsBoolean(), m_secondaryController.b().getAsBoolean());
               intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
