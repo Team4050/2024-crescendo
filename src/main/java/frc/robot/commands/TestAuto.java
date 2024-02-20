@@ -36,14 +36,14 @@ public class TestAuto extends Command {
     timer = new Timer();
     timer.start();
     ArrayList<Translation2d> list = new ArrayList<Translation2d>();
-    list.add(new Translation2d(1, 0));
+    list.add(new Translation2d(0.5, 0));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
             list,
-            new Pose2d(1, 0, Rotation2d.fromDegrees(0)),
+            new Pose2d(0.5, 0, Rotation2d.fromDegrees(0)),
             tconfig);
-    end = timer.get() + trajectory.getTotalTimeSeconds() + 0.5;
+    end = timer.get() + trajectory.getTotalTimeSeconds() + 2.5;
     //3 means 11 inches
   }
 

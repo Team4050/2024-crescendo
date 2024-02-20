@@ -75,10 +75,10 @@ public class Drivetrain extends SubsystemBase {
   public DifferentialDriveKinematics kinematics;
 
   //
-  private double kP = 0.001;
-  private double kI = 0.000001;
-  private double kD = 0.0005;
-  private double kF = 0.003;
+  private double kP = 0.0019;
+  private double kI = 0;
+  private double kD = 0.0000;
+  private double kF = 0.00008;
 
   public Drivetrain(Pose2d initial) {
     leftF = new CANSparkMax(Constants.MotorCANValues.leftMotorFront, MotorType.kBrushless);
@@ -275,6 +275,7 @@ public class Drivetrain extends SubsystemBase {
 
     loop++;
     if (loop > 50) {
+      System.out.println(leftEncoder.getPosition());
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }
