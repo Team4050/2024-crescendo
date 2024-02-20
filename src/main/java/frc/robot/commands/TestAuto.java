@@ -25,7 +25,6 @@ public class TestAuto extends Command {
 
   public TestAuto(Drivetrain d) {
     drive = d;
-    System.out.println("bruh real");
   }
 
   @Override
@@ -47,19 +46,28 @@ public class TestAuto extends Command {
     //3 means 11 inches
   }
 
+  int loop = 0;
   @Override
   public void execute() {
     drive.follow(trajectory, timer.get());
     State s = trajectory.sample(timer.get());
-    System.out.println(
-        "target: "
+    loop++;
+    if (loop > 50) {
+      System.out.println(
+        "Target: "
             + s.poseMeters.getX()
             + " "
             + s.poseMeters.getY()
             + " "
-            + s.poseMeters.getRotation().getRadians());
-    // + "\n" +
-    // "speeds: " + d.leftMetersPerSecond + " " + d.rightMetersPerSecond);
+            + s.poseMeters.getRotation().getDegrees());
+      System.out.println(
+        "Measured: "
+            + drive.get().getX()
+            + " "
+            + drive.get().getY()
+            + " "
+            + drive.get().getRotation().getDegrees());
+    }
   }
 
   @Override

@@ -68,16 +68,16 @@ public class Drivetrain extends SubsystemBase {
   private ADIS16470_IMU imu;
 
   /* Constants */
-  private double wheelRadMeters = 0.1524;
+  private double wheelRadMeters = 0.0762;
   private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
   private double gearRatio = 8.46;
-  private double encoderToMeters = wheelCircumMeters / (42 * gearRatio); // TODO:
+  private double encoderToMeters = wheelCircumMeters / (42 * gearRatio);
   public DifferentialDriveKinematics kinematics;
 
   //
   private double kP = 0.0019;
   private double kI = 0;
-  private double kD = 0.0000;
+  private double kD = 0;
   private double kF = 0.00008;
 
   public Drivetrain(Pose2d initial) {
@@ -99,8 +99,6 @@ public class Drivetrain extends SubsystemBase {
 
     leftEncoder = leftF.getEncoder();
     rightEncoder = rightF.getEncoder();
-
-    //leftEncoder = leftF.getAlternateEncoder()
 
     System.out.println("Conversion factor:" + leftEncoder.getVelocityConversionFactor());
 
@@ -142,7 +140,7 @@ public class Drivetrain extends SubsystemBase {
     controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
 
     //Ramsete controller tuning for meters is 2.0 & 0.7 https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/ramsete.html
-    ramController = new RamseteController(1.5, 0.9);
+    ramController = new RamseteController(2.0, 0.7);
   }
 
   private void configMotor(TalonSRX m) {
@@ -279,7 +277,7 @@ public class Drivetrain extends SubsystemBase {
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }
-    estimator.update(
+    position = estimator.update(
         new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
         new DifferentialDriveWheelPositions(
             leftEncoder.getPosition() * encoderToMeters,
@@ -296,7 +294,7 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
-    System.out.println("pose:" + p.poseMeters + " " + position);
+    //System.out.println("pose:" + p.poseMeters + " " + position);
     
     ChassisSpeeds speeds = ramController.calculate(position, p);
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
