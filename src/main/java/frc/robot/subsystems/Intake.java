@@ -76,4 +76,14 @@ public class Intake extends SubsystemBase {
   public boolean get() {
     return breakbeam.get();
   }
+
+  int loop = 0;
+  @Override
+  public void periodic() {
+    loop++;
+    if (loop > 30) {
+      System.out.println("IR breakbeam:" + breakbeam.get());
+    }
+  }
 }
+ 
