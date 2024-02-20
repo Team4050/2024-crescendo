@@ -40,13 +40,13 @@ public class Intake extends SubsystemBase {
    *
    * @param state
    */
-  public void setIntake(boolean state, boolean two) {
+  public void setIntake(boolean state, boolean reverse) {
     this.state = state;
     if (state) {
       //intake.set(Constants.MotorDriveValues.intakeSpeed);
       controller.setReference(-0.5, ControlType.kDutyCycle);
       return;
-    } else if (two) {
+    } else if (reverse) {
       controller.setReference(0.5, ControlType.kDutyCycle);
       return;
     }

@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlignShooter;
+import frc.robot.commands.NoteStateMachine;
 import frc.robot.commands.TestAuto;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
@@ -107,6 +108,7 @@ public class RobotContainer {
               intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
+    //m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
   }
 
   /**
