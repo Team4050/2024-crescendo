@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -13,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlignShooter;
+import frc.robot.commands.NoteStateMachine;
 import frc.robot.commands.TestAuto;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
@@ -50,13 +54,15 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final HazardXbox m_driverController =
       new HazardXbox(OperatorConstants.kDriverControllerPort);
+  private final HazardXbox m_secondaryController = 
+      new HazardXbox(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
-    drivetrain = new Drivetrain();
+    drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
     shooter = null;
 
@@ -98,9 +104,11 @@ public class RobotContainer {
     intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(m_driverController.rightTrigger().getAsBoolean(), m_driverController.b().getAsBoolean());
+              intake.setIntake(m_secondaryController.rightTrigger().getAsBoolean(), m_secondaryController.b().getAsBoolean());
+              intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
+    //m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
   }
 
   /**
@@ -125,8 +133,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    Command c = autoChooser.getSelected();
-    autoChooser.close();
+    Command c;// = autoChooser.getSelected();
+    //autoChooser.close();
+    c = new TestAuto(drivetrain);
     return c; // Autos.exampleAuto(m_exampleSubsystem);
   }
 }

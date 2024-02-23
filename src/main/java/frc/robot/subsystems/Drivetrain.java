@@ -66,7 +66,7 @@ public class Drivetrain extends SubsystemBase {
   /* Constants */
   private double wheelRadMeters = 0.1524;
   private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
-  private double encoderToMeters = 1; // TODO:
+  private double encoderToMeters = wheelCircumMeters / 42; // TODO:
   private double gearRatio = 8.46;
   private DifferentialDriveKinematics kinematics;
 
@@ -84,8 +84,8 @@ public class Drivetrain extends SubsystemBase {
     leftR.follow(leftF);
     rightR.follow(rightF);
 
-    rightF.setInverted(true);
-    leftF.setInverted(false);
+    rightF.setInverted(false);
+    leftF.setInverted(true);
 
     leftF.setIdleMode(IdleMode.kBrake);
     leftR.setIdleMode(IdleMode.kBrake);
@@ -126,7 +126,7 @@ public class Drivetrain extends SubsystemBase {
     // track width ~20 inch?
     controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
 
-    ramController = new RamseteController(0.2, 0.5);
+    ramController = new RamseteController(0.5, 0.2);
   }
 
   private void configMotor(TalonSRX m) {
@@ -312,6 +312,7 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
+    System.out.println(p.poseMeters + " " + position + " ");
     DifferentialDriveWheelVoltages dv =
         controller.calculate(
             position,

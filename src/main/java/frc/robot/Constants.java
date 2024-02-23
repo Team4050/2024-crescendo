@@ -30,16 +30,16 @@ public final class Constants {
     public static final int leftClimber = 1;
     public static final int rightClimber = 1;
 
-    public static final int shooterWheel = 6;
+    public static final int shooterWheel = 7;
 
     public static final int intake = 5;
-    public static final int conveyor = 7;
+    public static final int conveyor = 6;
   }
   ;
 
   public static class MotorDriveValues {
     public static final double intakeSpeed = -0.2;
-    public static final double conveyorSpeed = 0;
+    public static final double conveyorSpeed = 0.7;
   }
   ;
 
