@@ -70,15 +70,15 @@ public class Drivetrain extends SubsystemBase {
   /* Constants */
   private double wheelRadMeters = 0.0762;
   private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
-  private double gearRatio = 8.46;
-  private double encoderToMeters = wheelCircumMeters / (42 * gearRatio);
+  private double gearRatio = 8.45;
+  private double encoderToMeters = wheelCircumMeters / (42.0 * gearRatio);
   public DifferentialDriveKinematics kinematics;
 
   //
-  private double kP = 0.0019;
+  private double kP = 0.0016;
   private double kI = 0;
-  private double kD = 0.000001;
-  private double kF = 0.00006;
+  private double kD = 0.0000001;
+  private double kF = 0.00004;
 
   public Drivetrain(Pose2d initial) {
     leftF = new CANSparkMax(Constants.MotorCANValues.leftMotorFront, MotorType.kBrushless);
@@ -246,9 +246,9 @@ public class Drivetrain extends SubsystemBase {
 
     leftControl.setReference(lEncoderSpeed, ControlType.kVelocity);
     rightControl.setReference(rEncoderSpeed, ControlType.kVelocity);
-    System.out.println("Target encoder speeds:" + lEncoderSpeed + " " + rEncoderSpeed);
-    System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " + rightEncoder.getVelocity());
-    System.out.println("Measured encoder positions: " + leftEncoder.getPosition() + " " + rightEncoder.getPosition());
+    System.out.println("Speed Error:" + (lEncoderSpeed - leftEncoder.getVelocity()) + " " + (rEncoderSpeed - rightEncoder.getVelocity()));
+    //System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " + rightEncoder.getVelocity());
+    //System.out.println("Measured encoder positions: " + leftEncoder.getPosition() + " " + rightEncoder.getPosition());
     return null;
   }
 
