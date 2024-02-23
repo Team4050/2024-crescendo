@@ -2,15 +2,12 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-
-import edu.wpi.first.wpilibj.DigitalInput;
-import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
-
-import edu.wpi.first.wpilibj.Ultrasonic;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkPIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -19,7 +16,7 @@ public class Intake extends SubsystemBase {
   private CANSparkMax intake;
   private SparkPIDController controller;
   private TalonSRX conveyor;
-  //private Ultrasonic ultrasonic;
+  // private Ultrasonic ultrasonic;
   private DigitalInput breakbeam;
 
   public Intake() {
@@ -43,7 +40,7 @@ public class Intake extends SubsystemBase {
   public void setIntake(boolean state, boolean reverse) {
     this.state = state;
     if (state) {
-      //intake.set(Constants.MotorDriveValues.intakeSpeed);
+      // intake.set(Constants.MotorDriveValues.intakeSpeed);
       controller.setReference(-0.5, ControlType.kDutyCycle);
       return;
     } else if (reverse) {
@@ -51,7 +48,7 @@ public class Intake extends SubsystemBase {
       return;
     }
     controller.setReference(0, ControlType.kDutyCycle);
-    //intake.set(0);
+    // intake.set(0);
   }
 
   /**
@@ -78,6 +75,7 @@ public class Intake extends SubsystemBase {
   }
 
   int loop = 0;
+
   @Override
   public void periodic() {
     loop++;
@@ -86,4 +84,3 @@ public class Intake extends SubsystemBase {
     }
   }
 }
- 

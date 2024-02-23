@@ -25,13 +25,13 @@ public class TestAuto extends Command {
 
   public TestAuto(Drivetrain d) {
     drive = d;
-    //System.out.println("bruh real");
+    // System.out.println("bruh real");
   }
 
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-      new TrajectoryConfig(Units.MetersPerSecond.of(8), Units.MetersPerSecondPerSecond.of(2));
+        new TrajectoryConfig(Units.MetersPerSecond.of(8), Units.MetersPerSecondPerSecond.of(2));
     super.initialize();
     timer = new Timer();
     timer.start();
@@ -44,7 +44,7 @@ public class TestAuto extends Command {
             new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
             tconfig);
     end = timer.get() + trajectory.getTotalTimeSeconds();
-    //3 means 11 inches
+    // 3 means 11 inches
   }
 
   @Override

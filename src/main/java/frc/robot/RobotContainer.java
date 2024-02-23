@@ -16,8 +16,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AlignShooter;
-import frc.robot.commands.NoteStateMachine;
 import frc.robot.commands.TestAuto;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
@@ -56,7 +54,7 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final HazardXbox m_driverController =
       new HazardXbox(OperatorConstants.kDriverControllerPort);
-  private final HazardXbox m_secondaryController = 
+  private final HazardXbox m_secondaryController =
       new HazardXbox(OperatorConstants.kSecondaryControllerPort);
   private final Joystick m_driverJoystick =
       new Joystick(OperatorConstants.kDriverFStickControllerPort);
@@ -78,35 +76,43 @@ public class RobotContainer {
     controlProfile = new TrapezoidProfile(c);
     configureBindings();
 
-    drivetrainDefault = new RunCommand(
-      () -> {
-        double f = -m_driverController.getLeftY();
-        double t = m_driverController.getRightX(0.04f);
-        drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
-      },
-      drivetrain);
-    drivetrainFStickDefault = new RunCommand(
-      () -> {
-        double f = -m_driverJoystick.getY();
-        double t = m_driverJoystick.getZ();
-        drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
-      }, drivetrain);
-    drivetrainTank = new RunCommand(
-      () -> {
-        drivetrain.set(Math.log(-m_driverController.getLeftY() + Math.E) - 1, (Math.log(m_driverController.getRightY() + Math.E) - 1));
-      },
-      drivetrain);
-    drivetrainArcade1Stick = new RunCommand(
-      () -> {
-        double f = -m_driverController.getLeftY();
-        double t = m_driverController.getLeftX(0.04f);
-        drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
-      },
-      drivetrain);
-    
+    drivetrainDefault =
+        new RunCommand(
+            () -> {
+              double f = -m_driverController.getLeftY();
+              double t = m_driverController.getRightX(0.04f);
+              drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
+            },
+            drivetrain);
+    drivetrainFStickDefault =
+        new RunCommand(
+            () -> {
+              double f = -m_driverJoystick.getY();
+              double t = m_driverJoystick.getZ();
+              drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
+            },
+            drivetrain);
+    drivetrainTank =
+        new RunCommand(
+            () -> {
+              drivetrain.set(
+                  Math.log(-m_driverController.getLeftY() + Math.E) - 1,
+                  (Math.log(m_driverController.getRightY() + Math.E) - 1));
+            },
+            drivetrain);
+    drivetrainArcade1Stick =
+        new RunCommand(
+            () -> {
+              double f = -m_driverController.getLeftY();
+              double t = m_driverController.getLeftX(0.04f);
+              drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
+            },
+            drivetrain);
+
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
-    driveControlChooser.addOption("Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
+    driveControlChooser.addOption(
+        "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
     driveControlChooser.addOption("Tank control scheme", drivetrainTank);
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
@@ -115,20 +121,22 @@ public class RobotContainer {
     intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(m_secondaryController.rightTrigger().getAsBoolean(), m_secondaryController.b().getAsBoolean());
+              intake.setIntake(
+                  m_secondaryController.rightTrigger().getAsBoolean(),
+                  m_secondaryController.b().getAsBoolean());
               intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
     /*shooter.setDefaultCommand(
-        new RunCommand(
-          () -> {
-            if (m_secondaryController.x().getAsBoolean()) {
-              shooter.fire(Constants.MotorDriveValues.shooterSpeed);
-            } else {
-              shooter.fire(0);
-            }
-          }, shooter));*/
-    //m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
+    new RunCommand(
+      () -> {
+        if (m_secondaryController.x().getAsBoolean()) {
+          shooter.fire(Constants.MotorDriveValues.shooterSpeed);
+        } else {
+          shooter.fire(0);
+        }
+      }, shooter));*/
+    // m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
   }
 
   /**
@@ -153,8 +161,8 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    Command c;// = autoChooser.getSelected();
-    //autoChooser.close();
+    Command c; // = autoChooser.getSelected();
+    // autoChooser.close();
     c = new TestAuto(drivetrain);
     return c; // Autos.exampleAuto(m_exampleSubsystem);
   }
