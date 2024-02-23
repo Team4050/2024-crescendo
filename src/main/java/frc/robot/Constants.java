@@ -17,6 +17,8 @@ import edu.wpi.first.math.geometry.Transform3d;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kSecondaryControllerPort = 1;
+    public static final int kDriverFStickControllerPort = 0;
   }
   ;
 

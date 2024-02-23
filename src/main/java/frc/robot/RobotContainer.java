@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,6 +48,7 @@ public class RobotContainer {
   private TrapezoidProfile controlProfile;
 
   private final RunCommand drivetrainDefault;
+  private final RunCommand drivetrainFStickDefault;
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
 
@@ -55,7 +57,9 @@ public class RobotContainer {
   private final HazardXbox m_driverController =
       new HazardXbox(OperatorConstants.kDriverControllerPort);
   private final HazardXbox m_secondaryController = 
-      new HazardXbox(1);
+      new HazardXbox(OperatorConstants.kSecondaryControllerPort);
+  private final Joystick m_driverJoystick =
+      new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -81,6 +85,12 @@ public class RobotContainer {
         drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
       },
       drivetrain);
+    drivetrainFStickDefault = new RunCommand(
+      () -> {
+        double f = -m_driverJoystick.getY();
+        double t = m_driverJoystick.getZ();
+        drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
+      }, drivetrain);
     drivetrainTank = new RunCommand(
       () -> {
         drivetrain.set(Math.log(-m_driverController.getLeftY() + Math.E) - 1, (Math.log(m_driverController.getRightY() + Math.E) - 1));
@@ -96,6 +106,7 @@ public class RobotContainer {
     
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
+    driveControlChooser.addOption("Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
     driveControlChooser.addOption("Tank control scheme", drivetrainTank);
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
