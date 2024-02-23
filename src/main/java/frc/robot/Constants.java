@@ -23,7 +23,7 @@ public final class Constants {
   ;
 
   public static class MotorCANValues {
-    // All motors are Talon SRX
+    // All motors are Rev NEO except for conveyor which is Talon SRX
     public static final int leftMotorFront = 2;
     public static final int leftMotorRear = 1;
     public static final int rightMotorFront = 3;
@@ -40,6 +40,7 @@ public final class Constants {
   ;
 
   public static class MotorDriveValues {
+    public static final double shooterSpeed = 1;
     public static final double intakeSpeed = -0.2;
     public static final double conveyorSpeed = 0.7;
   }

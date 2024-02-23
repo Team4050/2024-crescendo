@@ -1,6 +1,10 @@
 package frc.robot.subsystems;
 
+import frc.robot.Constants.MotorCANValues;
+
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gun extends SubsystemBase {
@@ -8,7 +12,7 @@ public class Gun extends SubsystemBase {
   private CANSparkMax shooter;
 
   public Gun() {
-    /* TODO: shooter motor declaration */
+    shooter = new CANSparkMax(MotorCANValues.shooterWheel, MotorType.kBrushless);
   }
 
   @Override

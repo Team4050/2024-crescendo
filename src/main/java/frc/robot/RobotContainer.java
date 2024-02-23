@@ -119,6 +119,15 @@ public class RobotContainer {
               intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
+    /*shooter.setDefaultCommand(
+        new RunCommand(
+          () -> {
+            if (m_secondaryController.x().getAsBoolean()) {
+              shooter.fire(Constants.MotorDriveValues.shooterSpeed);
+            } else {
+              shooter.fire(0);
+            }
+          }, shooter));*/
     //m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
   }
 
