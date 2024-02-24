@@ -41,8 +41,8 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-  private final Joystick jLeft = new Joystick(1);
-  private final Joystick jRight = new Joystick(2);
+  private final Joystick m_driverFStick = new Joystick(OperatorConstants.kDriverControllerPort);
+  //private final Joystick jRight = new Joystick(2);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -52,7 +52,9 @@ public class RobotContainer {
     drivetrain = new Drivetrain();
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
-      drivetrain.set(jLeft.getY(), jRight.getY());
+      double f = -m_driverFStick.getY();
+      double t = m_driverFStick.getX();
+      drivetrain.set((f - t), (f + t));
     }, drivetrain));
   }
 
