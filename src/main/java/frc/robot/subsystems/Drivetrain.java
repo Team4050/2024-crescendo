@@ -114,8 +114,6 @@ public class Drivetrain extends SubsystemBase {
     rightControl.setFF(kF);
 
     kinematics = new DifferentialDriveKinematics(0.508);
-    estimator =
-        new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
     position = initial;
     vision = new HazardVision();
     imu = new ADIS16470_IMU();
@@ -130,12 +128,15 @@ public class Drivetrain extends SubsystemBase {
     double maxV = A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
     System.out.println(maxV);
 
-    // Gear ratio for 2022 was 10.75:1
+    // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1
     LinearSystem<N2, N2, N2> plant =
         buildPlant(0.0762, 0.27305, 0.118, 0.118, 5.0, 40.0, 1, 1, 1, 1);
 
-    // track width ~20 inch?
     controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
+
+    estimator =
+      new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(Math.toRadians(imu.getAngle() + 90)), leftEncoder.getPosition() * encoderToMeters, rightEncoder.getPosition() * encoderToMeters, initial);
+
 
     //Ramsete controller tuning for meters is 2.0 & 0.7 https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/ramsete.html
     ramController = new RamseteController(1.6, 0.7);
@@ -297,7 +298,6 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
-    //System.out.println("pose:" + p.poseMeters + " " + position);
     
     ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
