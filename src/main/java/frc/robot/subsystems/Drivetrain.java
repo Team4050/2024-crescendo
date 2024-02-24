@@ -89,18 +89,20 @@ public class Drivetrain extends SubsystemBase {
     rightF = new TalonSRX(Constants.MotorCANValues.rightMotorFront);
     rightR = new TalonSRX(Constants.MotorCANValues.rightMotorRear);
 
-    leftR.follow(leftF);
-    rightR.follow(rightF);
+    //leftR.follow(leftF);
+    //rightR.follow(rightF);
 
     rightF.setInverted(true);
+    rightR.setInverted(true);
     leftF.setInverted(false);
+    leftR.setInverted(false);
 
     leftF.setNeutralMode(NeutralMode.Brake);
     leftR.setNeutralMode(NeutralMode.Brake);
     rightF.setNeutralMode(NeutralMode.Brake);
     rightR.setNeutralMode(NeutralMode.Brake);
 
-    leftControl.setP(kP);
+    /*leftControl.setP(kP);
     leftControl.setI(kI);
     leftControl.setD(kD);
     leftControl.setFF(kF);
@@ -108,7 +110,7 @@ public class Drivetrain extends SubsystemBase {
     rightControl.setP(kP);
     rightControl.setI(kI);
     rightControl.setD(kD);
-    rightControl.setFF(kF);
+    rightControl.setFF(kF);*/
 
     kinematics = new DifferentialDriveKinematics(0.508);
     estimator =
@@ -229,9 +231,9 @@ public class Drivetrain extends SubsystemBase {
    */
   public void set(double lSpeed, double rSpeed) {
     leftF.set(TalonSRXControlMode.PercentOutput, lSpeed);
-    // leftR.set(lSpeed);
+    leftR.set(TalonSRXControlMode.PercentOutput, lSpeed);
     rightF.set(TalonSRXControlMode.PercentOutput, rSpeed);
-    // rightR.set(rSpeed);
+    rightR.set(TalonSRXControlMode.PercentOutput, rSpeed);
   }
 
   public double[] setVelocity(double lVel, double rVel) {
@@ -268,23 +270,23 @@ public class Drivetrain extends SubsystemBase {
     super.periodic();
 
     loop++;
-    if (loop > 50) {
+    if (loop > 30) {
       System.out.println(position);
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }
 
-    position = estimator.update(
+    /*position = estimator.update(
         new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(90)),
         new DifferentialDriveWheelPositions(
             -leftEncoder.getPosition() * encoderToMeters,
-            -rightEncoder.getPosition() * encoderToMeters));
+            -rightEncoder.getPosition() * encoderToMeters));*/
 
     
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     //System.out.println("periodic");
     if (pose.isPresent()) {
-        System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
+        //System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
         position = pose.get().estimatedPose.toPose2d();
     }
   }

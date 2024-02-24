@@ -84,7 +84,7 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       double f = -m_driverFStick.getY();
       double t = m_driverFStick.getX();
-      drivetrain.set((f - t), (f + t));
+      drivetrain.set((f + t), (f - t));
     }, drivetrain));
   }
 
@@ -100,7 +100,7 @@ public class RobotContainer {
   private void configureBindings() {}
 
   public void chooseControls() {
-    drivetrain.setDefaultCommand(driveControlChooser.getSelected());
+    //drivetrain.setDefaultCommand(driveControlChooser.getSelected());
   }
 
   /**

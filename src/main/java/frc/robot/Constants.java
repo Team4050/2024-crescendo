@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 /**
@@ -22,10 +23,10 @@ public final class Constants {
 
   public static class MotorCANValues {
     // All motors are Talon SRX
-    public static final int leftMotorFront = 2;
+    public static final int leftMotorFront = 4;
     public static final int leftMotorRear = 1;
-    public static final int rightMotorFront = 3;
-    public static final int rightMotorRear = 4;
+    public static final int rightMotorFront = 2;
+    public static final int rightMotorRear = 3;
 
     public static final int leftClimber = 1;
     public static final int rightClimber = 1;
@@ -45,6 +46,6 @@ public final class Constants {
 
   public static class Sensors {
     public static final String LimelightName = "Limelight";
-    public static final Transform3d RobotToCamera = new Transform3d();
+    public static final Transform3d RobotToCamera = new Transform3d(13.75 * 2.54 / 100, 0, 33.5 * 2.54 / 100, new Rotation3d(0, 55 * Math.PI / 180, 0));
   }
 }
