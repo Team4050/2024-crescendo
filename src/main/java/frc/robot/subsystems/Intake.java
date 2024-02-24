@@ -40,7 +40,6 @@ public class Intake extends SubsystemBase {
   public void setIntake(boolean state, boolean reverse) {
     this.state = state;
     if (state) {
-      // intake.set(Constants.MotorDriveValues.intakeSpeed);
       controller.setReference(-0.5, ControlType.kDutyCycle);
       return;
     } else if (reverse) {
@@ -48,7 +47,6 @@ public class Intake extends SubsystemBase {
       return;
     }
     controller.setReference(0, ControlType.kDutyCycle);
-    // intake.set(0);
   }
 
   /**
@@ -74,13 +72,14 @@ public class Intake extends SubsystemBase {
     return breakbeam.get();
   }
 
+  //TODO: Remove
   int loop = 0;
 
   @Override
   public void periodic() {
-    loop++;
+    /*loop++;
     if (loop > 30) {
       System.out.println("IR breakbeam:" + breakbeam.get());
-    }
+    }*/
   }
 }

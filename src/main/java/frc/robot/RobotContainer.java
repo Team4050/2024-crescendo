@@ -68,7 +68,7 @@ public class RobotContainer {
     SmartDashboard.putNumber("test", 1);
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
-    shooter = null;
+    shooter = new Gun();
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
@@ -125,9 +125,9 @@ public class RobotContainer {
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
             drivetrain);
-    m_driverController.b().onTrue(new RunCommand(() -> {
+    /*m_driverController.b().onTrue(new RunCommand(() -> {
       reverse = !reverse;
-    }, (Subsystem[])null));
+    }, (Subsystem[])null));*/
 
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
@@ -147,7 +147,7 @@ public class RobotContainer {
               intake.setConveyor(m_secondaryController.getLeftY());
             },
             intake));
-    /*shooter.setDefaultCommand(
+    shooter.setDefaultCommand(
     new RunCommand(
       () -> {
         if (m_secondaryController.x().getAsBoolean()) {
@@ -155,7 +155,7 @@ public class RobotContainer {
         } else {
           shooter.fire(0);
         }
-      }, shooter));*/
+      }, shooter));
     // m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
   }
 
