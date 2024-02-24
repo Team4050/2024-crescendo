@@ -27,22 +27,21 @@ package frc.robot.hazard;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
-import java.io.IOException;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
+/** Copied from 2023 code */
 public class HazardVision {
   public PhotonCamera chassis;
-  //public PhotonCamera claw;
+  // public PhotonCamera claw;
   private PhotonPoseEstimator poseEstimator;
 
   public HazardVision() {
-    chassis = null;//new PhotonCamera(Constants.Sensors.LimelightName);
+    chassis = new PhotonCamera(Constants.Sensors.LimelightName);
 
     AprilTagFieldLayout fieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     poseEstimator =
@@ -51,7 +50,7 @@ public class HazardVision {
             PoseStrategy.AVERAGE_BEST_TARGETS,
             chassis,
             Constants.Sensors.RobotToCamera);
-     /*catch (UncheckedIOException e) {
+    /*catch (UncheckedIOException e) {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
       poseEstimator = null;
     }*/

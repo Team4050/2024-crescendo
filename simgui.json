@@ -1,7 +1,9 @@
 {
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo"
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto chooser": "String Chooser",
+      "/SmartDashboard/Drive control chooser": "String Chooser"
     }
   },
   "NetworkTables Info": {

@@ -1,23 +1,27 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gun extends SubsystemBase {
-    /* */
+  /* */
+  private CANSparkMax shooter;
 
-    private boolean state = false;
+  public Gun() {
+    /* TODO: shooter motor declaration */
+  }
 
-    Gun() {
+  @Override
+  public void periodic() {
+    super.periodic();
+  }
 
-    }
-
-    @Override
-    public void periodic() {
-        // TODO Auto-generated method stub
-        super.periodic();
-    }
-
-    public boolean state(boolean newState) {
-        return state;
-    }
+  /**
+   * Set the speed of the shooter motor
+   *
+   * @param speed Output percentage -1.0 - 1.0
+   */
+  public void fire(double speed) {
+    shooter.set(speed);
+  }
 }

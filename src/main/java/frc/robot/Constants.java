@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 /**
@@ -18,27 +17,31 @@ import edu.wpi.first.math.geometry.Transform3d;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
-  };
+  }
+  ;
 
   public static class MotorCANValues {
-    //All motors are Talon SRX
-    public static final int leftMotorFront = 4;
+    // All motors are Talon SRX
+    public static final int leftMotorFront = 2;
     public static final int leftMotorRear = 1;
-    public static final int rightMotorFront = 2;
-    public static final int rightMotorRear = 3;
+    public static final int rightMotorFront = 3;
+    public static final int rightMotorRear = 4;
 
-    public static final int leftClimber = 8; //TODO: Confirm this is the left one
-    public static final int rightClimber = 9;
+    public static final int leftClimber = 1;
+    public static final int rightClimber = 1;
 
-    public static final int leftShooterWheel = 1; //Shooter wheels detached
-    public static final int rightShooterWheel = 1;
+    public static final int shooterWheel = 6;
 
-    public static final int intake = 7;
-  };
+    public static final int intake = 5;
+    public static final int conveyor = 7;
+  }
+  ;
 
   public static class MotorDriveValues {
-
-  };
+    public static final double intakeSpeed = -0.2;
+    public static final double conveyorSpeed = 0;
+  }
+  ;
 
   public static class Sensors {
     public static final String LimelightName = "Limelight";

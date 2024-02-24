@@ -12,11 +12,23 @@ import frc.robot.subsystems.Drivetrain;
 import org.photonvision.PhotonCamera;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlignShooter;
+import frc.robot.commands.TestAuto;
+import frc.robot.hazard.HazardXbox;
+import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Gun;
+import frc.robot.subsystems.Intake;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -29,17 +41,26 @@ public class RobotContainer {
 
   /* Subsystems */
   private final Drivetrain drivetrain;
+  private final Intake intake;
+  private final Gun shooter;
 
   /* Commands */
 
   /* Sensors */
 
   /* Misc */
+  private SendableChooser<Command> autoChooser;
+  private SendableChooser<RunCommand> driveControlChooser;
+  private TrapezoidProfile controlProfile;
+
+  //private final RunCommand drivetrainDefault;
+  //private final RunCommand drivetrainTank;
+  //private final RunCommand drivetrainArcade1Stick;
 
   /* Controllers */
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final HazardXbox m_driverController =
+      new HazardXbox(OperatorConstants.kDriverControllerPort);
 
   private final Joystick m_driverFStick = new Joystick(OperatorConstants.kDriverControllerPort);
   //private final Joystick jRight = new Joystick(2);
@@ -47,9 +68,18 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    //limelight = null;//new PhotonCamera(Constants.Sensors.LimelightName);
+    // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
-    drivetrain = new Drivetrain();
+    drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
+    intake = new Intake();
+    shooter = null;
+
+    autoChooser = new SendableChooser<Command>();
+    autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
+
+    SmartDashboard.putData("Auto chooser", autoChooser);
+    Constraints c = new Constraints(1, 0.5);
+    controlProfile = new TrapezoidProfile(c);
     configureBindings();
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       double f = -m_driverFStick.getY();
@@ -67,8 +97,10 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
+  private void configureBindings() {}
 
+  public void chooseControls() {
+    drivetrain.setDefaultCommand(driveControlChooser.getSelected());
   }
 
   /**
@@ -78,6 +110,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new TestAuto(drivetrain);//Autos.exampleAuto(m_exampleSubsystem);
+    Command c;// = autoChooser.getSelected();
+    //autoChooser.close();
+    c = new TestAuto(drivetrain);
+    return c; // Autos.exampleAuto(m_exampleSubsystem);
   }
 }
