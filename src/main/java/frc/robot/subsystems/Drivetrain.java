@@ -276,16 +276,19 @@ public class Drivetrain extends SubsystemBase {
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }
+    
+    update();
+  }
 
+  public void update() {
     position = estimator.update(
-        new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(90)),
-        new DifferentialDriveWheelPositions(
-            -leftEncoder.getPosition() * encoderToMeters,
-            -rightEncoder.getPosition() * encoderToMeters));
+      new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(90)),
+      new DifferentialDriveWheelPositions(
+          -leftEncoder.getPosition() * encoderToMeters,
+          -rightEncoder.getPosition() * encoderToMeters));
 
     /*
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
-    //System.out.println("periodic");
     if (pose.isPresent()) {
         System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
         position = pose.get().estimatedPose.toPose2d();
