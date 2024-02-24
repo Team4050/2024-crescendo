@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -49,6 +50,7 @@ public class RobotContainer {
   private final RunCommand drivetrainFStickDefault;
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
+  private boolean reverse = false;
 
   /* Controllers */
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -81,6 +83,9 @@ public class RobotContainer {
             () -> {
               double f = -m_driverController.getLeftY();
               double t = m_driverController.getRightX(0.04f);
+              if (reverse) {
+                f = -f;
+              }
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
             drivetrain);
@@ -89,15 +94,24 @@ public class RobotContainer {
             () -> {
               double f = -m_driverJoystick.getY();
               double t = m_driverJoystick.getZ();
+              if (reverse) {
+                f = -f;
+              }
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
             drivetrain);
     drivetrainTank =
         new RunCommand(
             () -> {
-              drivetrain.set(
+              if (reverse) {
+                drivetrain.set(
                   Math.log(-m_driverController.getLeftY() + Math.E) - 1,
-                  (Math.log(m_driverController.getRightY() + Math.E) - 1));
+                  Math.log(m_driverController.getRightY() + Math.E) - 1);
+              } else {
+                drivetrain.set(
+                  Math.log(m_driverController.getLeftY() + Math.E) - 1,
+                  Math.log(-m_driverController.getRightY() + Math.E) - 1);
+              }
             },
             drivetrain);
     drivetrainArcade1Stick =
@@ -105,9 +119,15 @@ public class RobotContainer {
             () -> {
               double f = -m_driverController.getLeftY();
               double t = m_driverController.getLeftX(0.04f);
+              if (reverse) {
+                f = -f;
+              }
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
             drivetrain);
+    m_driverController.b().onTrue(new RunCommand(() -> {
+      reverse = !reverse;
+    }, (Subsystem[])null));
 
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
