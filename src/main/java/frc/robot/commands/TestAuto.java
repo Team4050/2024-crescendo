@@ -30,12 +30,12 @@ public class TestAuto extends Command {
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-      new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
+        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
     super.initialize();
     timer = new Timer();
     timer.start();
     ArrayList<Translation2d> list = new ArrayList<Translation2d>();
-    //3.93954
+    // 3.93954
     list.add(new Translation2d(1.9, 0));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
@@ -44,10 +44,11 @@ public class TestAuto extends Command {
             new Pose2d(1.9, 0, Rotation2d.fromDegrees(0)),
             tconfig);
     end = timer.get() + trajectory.getTotalTimeSeconds() + 2.5;
-    //3 means 11 inches
+    // 3 means 11 inches
   }
 
   int loop = 0;
+
   @Override
   public void execute() {
     drive.follow(trajectory, timer.get());
@@ -55,19 +56,19 @@ public class TestAuto extends Command {
     loop++;
     if (loop > 500) {
       System.out.println(
-        "Target: "
-            + s.poseMeters.getX()
-            + " "
-            + s.poseMeters.getY()
-            + " "
-            + s.poseMeters.getRotation().getDegrees());
+          "Target: "
+              + s.poseMeters.getX()
+              + " "
+              + s.poseMeters.getY()
+              + " "
+              + s.poseMeters.getRotation().getDegrees());
       System.out.println(
-        "Measured: "
-            + drive.get().getX()
-            + " "
-            + drive.get().getY()
-            + " "
-            + drive.get().getRotation().getDegrees());
+          "Measured: "
+              + drive.get().getX()
+              + " "
+              + drive.get().getY()
+              + " "
+              + drive.get().getRotation().getDegrees());
     }
   }
 

@@ -1,20 +1,16 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkAbsoluteEncoder.Type;
-import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
-
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 import edu.wpi.first.math.controller.LTVDifferentialDriveController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
@@ -35,7 +31,6 @@ import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.hazard.HazardVision;
@@ -135,10 +130,15 @@ public class Drivetrain extends SubsystemBase {
     controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
 
     estimator =
-      new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(Math.toRadians(imu.getAngle() + 90)), leftEncoder.getPosition() * encoderToMeters, rightEncoder.getPosition() * encoderToMeters, initial);
+        new DifferentialDrivePoseEstimator(
+            kinematics,
+            new Rotation2d(Math.toRadians(imu.getAngle() + 90)),
+            leftEncoder.getPosition() * encoderToMeters,
+            rightEncoder.getPosition() * encoderToMeters,
+            initial);
 
-
-    //Ramsete controller tuning for meters is 2.0 & 0.7 https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/ramsete.html
+    // Ramsete controller tuning for meters is 2.0 & 0.7
+    // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/ramsete.html
     ramController = new RamseteController(1.6, 0.7);
   }
 
@@ -232,9 +232,9 @@ public class Drivetrain extends SubsystemBase {
    * @param rSpeed
    */
   public void set(double lSpeed, double rSpeed) {
-    leftF.set(lSpeed);
+    // leftF.set(lSpeed);
     // leftR.set(lSpeed);
-    rightF.set(rSpeed);
+    // rightF.set(rSpeed);
     // rightR.set(rSpeed);
   }
 
@@ -247,9 +247,15 @@ public class Drivetrain extends SubsystemBase {
 
     leftControl.setReference(lEncoderSpeed, ControlType.kVelocity);
     rightControl.setReference(rEncoderSpeed, ControlType.kVelocity);
-    System.out.println("Speed Error:" + (lEncoderSpeed - leftEncoder.getVelocity()) + " " + (rEncoderSpeed - rightEncoder.getVelocity()));
-    //System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " + rightEncoder.getVelocity());
-    //System.out.println("Measured encoder positions: " + leftEncoder.getPosition() + " " + rightEncoder.getPosition());
+    System.out.println(
+        "Speed Error:"
+            + (lEncoderSpeed - leftEncoder.getVelocity())
+            + " "
+            + (rEncoderSpeed - rightEncoder.getVelocity()));
+    // System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " +
+    // rightEncoder.getVelocity());
+    // System.out.println("Measured encoder positions: " + leftEncoder.getPosition() + " " +
+    // rightEncoder.getPosition());
     return null;
   }
 
@@ -277,16 +283,17 @@ public class Drivetrain extends SubsystemBase {
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }
-    
+
     update();
   }
 
   public void update() {
-    position = estimator.update(
-      new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(90)),
-      new DifferentialDriveWheelPositions(
-          -leftEncoder.getPosition() * encoderToMeters,
-          -rightEncoder.getPosition() * encoderToMeters));
+    position =
+        estimator.update(
+            new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(90)),
+            new DifferentialDriveWheelPositions(
+                -leftEncoder.getPosition() * encoderToMeters,
+                -rightEncoder.getPosition() * encoderToMeters));
 
     /*
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
@@ -298,7 +305,7 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
-    
+
     ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
 

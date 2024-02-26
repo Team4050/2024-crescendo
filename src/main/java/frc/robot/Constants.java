@@ -17,11 +17,13 @@ import edu.wpi.first.math.geometry.Transform3d;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kSecondaryControllerPort = 1;
+    public static final int kDriverFStickControllerPort = 0;
   }
   ;
 
   public static class MotorCANValues {
-    // All motors are Talon SRX
+    // All motors are Rev NEO except for conveyor which is Talon SRX
     public static final int leftMotorFront = 2;
     public static final int leftMotorRear = 1;
     public static final int rightMotorFront = 3;
@@ -30,16 +32,17 @@ public final class Constants {
     public static final int leftClimber = 1;
     public static final int rightClimber = 1;
 
-    public static final int shooterWheel = 6;
+    public static final int shooterWheel = 5;
 
-    public static final int intake = 5;
-    public static final int conveyor = 7;
+    public static final int intake = 6;
+    public static final int conveyor = 6;
   }
   ;
 
   public static class MotorDriveValues {
+    public static final double shooterSpeed = -1;
     public static final double intakeSpeed = -0.2;
-    public static final double conveyorSpeed = 0;
+    public static final double conveyorSpeed = 0.7;
   }
   ;
 
