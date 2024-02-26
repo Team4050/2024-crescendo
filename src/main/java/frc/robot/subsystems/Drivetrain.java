@@ -109,8 +109,7 @@ public class Drivetrain extends SubsystemBase {
     rightControl.setD(kD);
     rightControl.setFF(kF);
 
-    //TODO: See if width is still 0.508
-    kinematics = new DifferentialDriveKinematics(0.508);
+    kinematics = new DifferentialDriveKinematics(0.42545);
     position = initial;
     vision = new HazardVision();
     imu = new ADIS16470_IMU();
@@ -278,7 +277,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void setIMU(double yaw) {
-    imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
+    imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw - Constants.Sensors.axisCorrectionDegrees);
   }
 
   int loop = 0;
