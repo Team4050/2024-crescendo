@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -49,5 +51,7 @@ public final class Constants {
   public static class Sensors {
     public static final String LimelightName = "Limelight";
     public static final Transform3d RobotToCamera = new Transform3d();
+    public static final IMUAxis robotYawAxis = IMUAxis.kRoll;
+    public static final double axisCorrectionDegrees = 90;
   }
 }

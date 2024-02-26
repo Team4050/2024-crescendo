@@ -16,6 +16,7 @@ import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
@@ -108,6 +109,7 @@ public class Drivetrain extends SubsystemBase {
     rightControl.setD(kD);
     rightControl.setFF(kF);
 
+    //TODO: See if width is still 0.508
     kinematics = new DifferentialDriveKinematics(0.508);
     position = initial;
     vision = new HazardVision();
@@ -271,6 +273,14 @@ public class Drivetrain extends SubsystemBase {
     return vision.getEstimatedGlobalPose(position);
   }
 
+  public Rotation2d getTransformedIMU() {
+    return new Rotation2d(Math.toRadians(imu.getAngle(Constants.Sensors.robotYawAxis) + Constants.Sensors.axisCorrectionDegrees));
+  }
+
+  public void setIMU(double yaw) {
+    imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
+  }
+
   int loop = 0;
 
   @Override
@@ -280,7 +290,7 @@ public class Drivetrain extends SubsystemBase {
     loop++;
     if (loop > 50) {
       System.out.println(position);
-      System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
+      System.out.println("imu yaw: " + getTransformedIMU());
       loop = 0;
     }
 
@@ -290,17 +300,17 @@ public class Drivetrain extends SubsystemBase {
   public void update() {
     position =
         estimator.update(
-            new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(90)),
+            getTransformedIMU(),
             new DifferentialDriveWheelPositions(
                 -leftEncoder.getPosition() * encoderToMeters,
                 -rightEncoder.getPosition() * encoderToMeters));
 
-    /*
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
         System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
         position = pose.get().estimatedPose.toPose2d();
-    }*/
+        setIMU(position.getRotation().getDegrees());
+    }
   }
 
   public boolean follow(Trajectory s, double t) {
