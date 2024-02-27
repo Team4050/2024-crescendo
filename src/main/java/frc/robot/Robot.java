@@ -41,8 +41,8 @@ public class Robot extends TimedRobot {
 
       }*/
     }
-    System.out.println("Success in setting camera? " + usbcam.setResolution(320, 240));
-    System.out.println("Camera info: " + usbcam.getVideoMode().width);
+    System.out.println("Success in setting camera? " + usbcam.setVideoMode(modes[8]));
+    System.out.println("Real FPS:" + usbcam.getActualFPS());
     m_robotContainer = new RobotContainer();
   }
 

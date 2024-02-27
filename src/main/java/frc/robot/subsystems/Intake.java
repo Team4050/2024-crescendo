@@ -56,11 +56,6 @@ public class Intake extends SubsystemBase {
    */
   public void setConveyor(double state) {
     conveyor.set(TalonSRXControlMode.PercentOutput, state);
-    /*if (state) {
-      conveyor.set(TalonSRXControlMode.PercentOutput, Constants.MotorDriveValues.conveyorSpeed);
-      return;
-    }
-    conveyor.set(TalonSRXControlMode.PercentOutput, 0);*/
   }
 
   /**

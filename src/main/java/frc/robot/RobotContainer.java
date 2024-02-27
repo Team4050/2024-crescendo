@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlignShooter;
 import frc.robot.commands.TestAuto;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
@@ -53,6 +54,7 @@ public class RobotContainer {
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
   private boolean reverse = false;
+  private AlignShooter alignShooter;
 
   /* Controllers */
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -133,6 +135,8 @@ public class RobotContainer {
               }
             },
             shooter));
+    alignShooter = new AlignShooter(drivetrain);
+    m_driverController.leftBumper().onTrue(alignShooter);
     // m_secondaryController.x().onTrue(new NoteStateMachine(intake, shooter));
   }
 
