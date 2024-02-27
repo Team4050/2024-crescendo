@@ -71,7 +71,7 @@ public class RobotContainer {
     shooter = new Gun();
 
     autoChooser = new SendableChooser<Command>();
-    autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
+    autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
     Constraints c = new Constraints(1, 0.5);
