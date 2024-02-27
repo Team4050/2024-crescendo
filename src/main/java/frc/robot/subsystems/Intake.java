@@ -64,7 +64,7 @@ public class Intake extends SubsystemBase {
   }
 
   /**
-   * Gets the ultrasonic range in millimeters
+   * Gets the beam status
    *
    * @return
    */
