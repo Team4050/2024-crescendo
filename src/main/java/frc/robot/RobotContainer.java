@@ -47,6 +47,7 @@ public class RobotContainer {
   private TrapezoidProfile controlProfile;
 
   private final RunCommand drivetrainDefault;
+  private final RunCommand drivetrainRamp;
   private final RunCommand drivetrainFStickDefault;
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
@@ -82,11 +83,23 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               double f = -m_driverController.getLeftY();
-              double t = m_driverController.getRightX(0.04f);
+              double t = m_driverController.getRightX(0.04f) / 1.8;
               if (reverse) {
                 f = -f;
               }
-              drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
+              drivetrain.set((f + t), (f - t));
+            },
+            drivetrain);
+    drivetrainRamp =
+        new RunCommand(
+            () -> {
+              double f = -m_driverController.getLeftY();
+              //double t =  m_driverController.getRightX(0.04f) * Math.abs(m_driverController.getRightX(0.04f)) / 1.7;
+              double t =  (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
+              if (reverse) {
+                f = -f;
+              }
+              drivetrain.set((f + t), (f - t));
             },
             drivetrain);
     drivetrainFStickDefault =
@@ -131,6 +144,7 @@ public class RobotContainer {
 
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
+    driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
     driveControlChooser.addOption(
         "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);

@@ -82,8 +82,8 @@ public class Drivetrain extends SubsystemBase {
     leftR.follow(leftF);
     rightR.follow(rightF);
 
-    rightF.setInverted(false);
-    leftF.setInverted(true);
+    rightF.setInverted(true);
+    leftF.setInverted(false);
 
     leftF.setIdleMode(IdleMode.kBrake);
     leftR.setIdleMode(IdleMode.kBrake);
@@ -217,9 +217,9 @@ public class Drivetrain extends SubsystemBase {
    * @param rSpeed
    */
   public void set(double lSpeed, double rSpeed) {
-    //leftF.set(lSpeed);
+    leftF.set(lSpeed);
     // leftR.set(lSpeed);
-    //rightF.set(rSpeed);
+    rightF.set(rSpeed);
     // rightR.set(rSpeed);
   }
 
