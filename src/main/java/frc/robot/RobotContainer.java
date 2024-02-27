@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,6 +37,7 @@ public class RobotContainer {
   private final Drivetrain drivetrain;
   private final Intake intake;
   private final Gun shooter;
+  private final PowerDistribution pdh;
 
   /* Commands */
 
@@ -65,6 +68,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
+    pdh = new PowerDistribution(0, ModuleType.kRev);
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
     shooter = new Gun();

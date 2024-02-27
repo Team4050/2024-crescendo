@@ -306,7 +306,7 @@ public class Drivetrain extends SubsystemBase {
 
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
-        System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
+        //System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
         position = pose.get().estimatedPose.toPose2d();
         setIMU(position.getRotation().getDegrees());
     }

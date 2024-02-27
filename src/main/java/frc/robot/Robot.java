@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode;
+import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -27,6 +31,18 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+    UsbCamera usbcam = CameraServer.startAutomaticCapture();
+    usbcam.setFPS(30);
+    usbcam.setPixelFormat(PixelFormat.kMJPEG);
+    VideoMode[] modes = usbcam.enumerateVideoModes();
+    for (int i = 0; i < modes.length; i++) {
+      System.out.println(modes[i].fps + " " + modes[i].height + " " + modes[i].width);
+      /*if (modes[i].fps == 60) {
+
+      }*/
+    }
+    System.out.println("Success in setting camera? " + usbcam.setResolution(320, 240));
+    System.out.println("Camera info: " + usbcam.getVideoMode().width);
     m_robotContainer = new RobotContainer();
   }
 
