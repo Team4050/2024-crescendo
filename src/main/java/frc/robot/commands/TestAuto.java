@@ -25,41 +25,51 @@ public class TestAuto extends Command {
 
   public TestAuto(Drivetrain d) {
     drive = d;
-    // System.out.println("bruh real");
   }
 
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-        new TrajectoryConfig(Units.MetersPerSecond.of(1), Units.MetersPerSecondPerSecond.of(1));
+        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
     super.initialize();
     timer = new Timer();
     timer.start();
     ArrayList<Translation2d> list = new ArrayList<Translation2d>();
-    list.add(new Translation2d(3, 0));
+    // 3.93954
+    list.add(new Translation2d(1.9, 0));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
             list,
-            new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
+            new Pose2d(1.9, 0, Rotation2d.fromDegrees(0)),
             tconfig);
-    end = timer.get() + trajectory.getTotalTimeSeconds();
+    end = timer.get() + trajectory.getTotalTimeSeconds() + 2.5;
     // 3 means 11 inches
   }
+
+  int loop = 0;
 
   @Override
   public void execute() {
     drive.follow(trajectory, timer.get());
     State s = trajectory.sample(timer.get());
-    System.out.println(
-        "target: "
-            + s.poseMeters.getX()
-            + " "
-            + s.poseMeters.getY()
-            + " "
-            + s.poseMeters.getRotation().getRadians());
-    // + "\n" +
-    // "speeds: " + d.leftMetersPerSecond + " " + d.rightMetersPerSecond);
+    loop++;
+    if (loop > 500) {
+      System.out.println(
+          "Target: "
+              + s.poseMeters.getX()
+              + " "
+              + s.poseMeters.getY()
+              + " "
+              + s.poseMeters.getRotation().getDegrees());
+      System.out.println(
+          "Measured: "
+              + drive.get().getX()
+              + " "
+              + drive.get().getY()
+              + " "
+              + drive.get().getRotation().getDegrees());
+    }
   }
 
   @Override
