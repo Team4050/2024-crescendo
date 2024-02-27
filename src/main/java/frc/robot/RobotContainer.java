@@ -152,6 +152,12 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
   }
 
+  public void periodic() {
+    if (pdh.getVoltage() < 12.0) {
+      pdh.setSwitchableChannel(false);
+    }
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
