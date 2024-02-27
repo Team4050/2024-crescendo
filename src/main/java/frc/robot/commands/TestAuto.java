@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
@@ -36,12 +37,12 @@ public class TestAuto extends Command {
     timer.start();
     ArrayList<Translation2d> list = new ArrayList<Translation2d>();
     // 3.93954
-    list.add(new Translation2d(1.9, 0));
+    list.add(drive.get().getTranslation().plus(new Translation2d(1.9, 0)));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
-            new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+            drive.get(),
             list,
-            new Pose2d(1.9, 0, Rotation2d.fromDegrees(0)),
+            drive.get().plus(new Transform2d(1.9, 0, new Rotation2d())),
             tconfig);
     end = timer.get() + trajectory.getTotalTimeSeconds() + 2.5;
     // 3 means 11 inches

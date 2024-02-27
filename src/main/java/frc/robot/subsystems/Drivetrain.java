@@ -233,9 +233,9 @@ public class Drivetrain extends SubsystemBase {
    * @param rSpeed
    */
   public void set(double lSpeed, double rSpeed) {
-    // leftF.set(lSpeed);
+    leftF.set(lSpeed);
     // leftR.set(lSpeed);
-    // rightF.set(rSpeed);
+    rightF.set(rSpeed);
     // rightR.set(rSpeed);
   }
 
@@ -278,6 +278,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void setIMU(double yaw) {
     imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw - Constants.Sensors.axisCorrectionDegrees);
+  }
+
+  public void setPose(Pose2d manual) {
+    position = manual;
   }
 
   int loop = 0;

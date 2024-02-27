@@ -68,7 +68,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     SmartDashboard.putNumber("test", 1);
-    pdh = new PowerDistribution(0, ModuleType.kRev);
+    pdh = new PowerDistribution(1, ModuleType.kRev);
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
     shooter = new Gun();
@@ -77,8 +77,7 @@ public class RobotContainer {
     autoChooser.setDefaultOption("test auto", new TestAuto(drivetrain));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
-    Constraints c = new Constraints(1, 0.5);
-    controlProfile = new TrapezoidProfile(c);
+
     configureBindings();
 
     drivetrainDefault =
