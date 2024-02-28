@@ -73,6 +73,12 @@ public class TestAuto extends Command {
   }
 
   @Override
+  public void end(boolean interrupted) {
+      drive.set(0, 0);
+      super.end(interrupted);
+  }
+
+  @Override
   public boolean isFinished() {
     return timer.get() > end;
   }
