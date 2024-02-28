@@ -59,6 +59,9 @@ public class RobotContainer {
       new HazardXbox(OperatorConstants.kDriverControllerPort);
   private final HazardXbox m_secondaryController =
       new HazardXbox(OperatorConstants.kSecondaryControllerPort);
+  private final Trigger x = m_secondaryController.x();
+  private final Trigger b = m_secondaryController.b();
+  private final Trigger rightTrigger = m_secondaryController.rightTrigger();
   private final Joystick m_driverJoystick =
       new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
@@ -156,21 +159,20 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               intake.setIntake(
-                  m_secondaryController.rightTrigger().getAsBoolean(),
-                  m_secondaryController.b().getAsBoolean());
+                  rightTrigger.getAsBoolean(),
+                  b.getAsBoolean());
 
-              if (m_secondaryController.x().getAsBoolean()) {
-                //intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
+              if (x.getAsBoolean()) {
+                intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
-                //intake.setConveyor(0);
+                intake.setConveyor(0);
               }
             },
             intake));
     shooter.setDefaultCommand(
         new RunCommand(
       () -> {
-        System.out.println(m_secondaryController.x().getAsBoolean());
-        if (m_secondaryController.x().getAsBoolean()) {
+        if (x.getAsBoolean()) {
           shooter.fire(Constants.MotorDriveValues.shooterSpeed);
         } else {
           shooter.fire(0);
