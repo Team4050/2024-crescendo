@@ -24,7 +24,6 @@ import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N5;
-// import edu.wpi.first.math.proto.System;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
@@ -254,33 +253,8 @@ public class Drivetrain extends SubsystemBase {
     // System.out.println("target: " + lWheelSpeed + " " + rWheelSpeed);
     // System.out.println("control: " + controlL + " " + controlR);
 
-    // leftFront.set(TalonSRXControlMode.PercentOutput, -0.2);
-    // leftBack.set(TalonSRXControlMode.PercentOutput, -0.2);
-    // rightFront.set(TalonSRXControlMode.PercentOutput, controlR);
-    // rightBack.set(TalonSRXControlMode.Follower, Constants.MotorCANValues.rightMotorFront);
-
     return null;
   }
-
-  // DANGER
-  public void setControl(double lSpeed, double rSpeed) {
-    // DifferentialDriveWheelVoltages v = controller.calculate(new Pose2d(),
-    // leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6,
-    // rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 409.6, new Pose2d(), lSpeed,
-    // rSpeed);
-    // System.out.println("velocity: " + (leftFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762
-    // / 4096) + " " + (rightFront.getSelectedSensorVelocity(0) * Math.PI * 0.0762 / 4096));
-    // System.out.println("control: " + v.left + " " + v.right);
-    // set(v.left, v.right);
-  }
-
-  /**
-   * Align the robot shooter to face a point at a set distance from it
-   *
-   * @param point
-   * @param distance
-   */
-  public void align(Translation2d point, double distance) {}
 
   int loop = 0;
 
@@ -289,10 +263,11 @@ public class Drivetrain extends SubsystemBase {
     super.periodic();
 
     loop++;
-    if (loop > 50) {
+    if (loop > 200) {
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }
+
     estimator.update(
         new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
         new DifferentialDriveWheelPositions(
@@ -310,17 +285,15 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
-    System.out.println(p.poseMeters + " " + position + " ");
-    DifferentialDriveWheelVoltages dv =
+    /*DifferentialDriveWheelVoltages dv =
         controller.calculate(
             position,
             leftF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
             rightF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
-            p);
+            p);*/
     ChassisSpeeds speeds = ramController.calculate(position, p);
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     setVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
-    // setV(dv.left, dv.right);
-    return controller.atReference();
+    return ramController.atReference();
   }
 }

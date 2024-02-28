@@ -69,7 +69,6 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
-    SmartDashboard.putNumber("test", 1);
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
     shooter = new Gun();
@@ -78,8 +77,7 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
-    Constraints c = new Constraints(1, 0.5);
-    controlProfile = new TrapezoidProfile(c);
+
     configureBindings();
 
     drivetrainDefault =
@@ -97,8 +95,7 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               double f = -m_driverController.getLeftY();
-              //double t =  m_driverController.getRightX(0.04f) * Math.abs(m_driverController.getRightX(0.04f)) / 1.7;
-              double t =  (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
+              double t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
               if (reverse) {
                 f = -f;
               }
@@ -201,10 +198,19 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    Command c; // = autoChooser.getSelected();
-    // autoChooser.close();
-    c = new TestAuto(drivetrain);
-    return c; // Autos.exampleAuto(m_exampleSubsystem);
+    Command c = autoChooser.getSelected();
+    //TODO: Use this code if fetching from chooser fails
+    /*switch (c) {
+      case "defaultAuto":
+        return new TestAuto(drivetrain);
+        break;
+    
+      default:
+        break;
+    }*/
+    //TODO: close resource since we're not using it twice in one run?
+    autoChooser.close();
+    //c = new TestAuto(drivetrain);
+    return c;
   }
 }
