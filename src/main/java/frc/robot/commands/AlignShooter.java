@@ -16,7 +16,8 @@ import org.photonvision.EstimatedRobotPose;
 public class AlignShooter extends Command {
   private Drivetrain drivetrain;
   // TODO: test position
-  private static Pose2d speakerLocation = new Pose2d(8.308467, 1.442593, new Rotation2d(Math.toRadians(180)));
+  // 16.579342, 4.982717999999999 
+  private static Pose2d speakerLocation = new Pose2d(16.579342, 4.982717999999999, new Rotation2d(Math.toRadians(180)));
   private static double distMeters = 1;
   private Trajectory s;
   private Timer t;
