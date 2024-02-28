@@ -35,7 +35,7 @@ public final class Constants {
     public static final int shooterWheel = 5;
 
     public static final int intake = 6;
-    public static final int conveyor = 6;
+    public static final int conveyor = 7;
   }
   ;
 
