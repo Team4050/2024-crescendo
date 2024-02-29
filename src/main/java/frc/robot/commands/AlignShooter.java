@@ -18,6 +18,7 @@ public class AlignShooter extends Command {
   // TODO: test position
   // 16.579342, 4.982717999999999 
   private static Pose2d speakerLocation = new Pose2d(16.579342, 4.982717999999999, new Rotation2d(Math.toRadians(180)));
+  private static Pose2d speakerLocation2 = new Pose2d(-0.038099999999999995, 5.547867999999999, new Rotation2d(0));
   private static double distMeters = 1;
   private Trajectory s;
   private Timer t;
@@ -29,15 +30,21 @@ public class AlignShooter extends Command {
   @Override
   public void initialize() {
     ArrayList<Pose2d> points = new ArrayList<Pose2d>(0);
+    Pose2d closestSpeaker = speakerLocation;
     // Difference vector
     Translation2d dif = speakerLocation.getTranslation().minus(drivetrain.get().getTranslation());
+    Translation2d dif2 = speakerLocation.getTranslation().minus(drivetrain.get().getTranslation());
+    if (dif2.getNorm() < dif.getNorm()) {
+      dif = dif2;
+      closestSpeaker = speakerLocation2;
+    }
     // Normalize
     dif = dif.times(1 / dif.getNorm());
     points.add(drivetrain.get());
     points.add(
         new Pose2d(
             // Scale difference norm by desired length
-            speakerLocation.getTranslation().plus(dif.times(distMeters)),
+            closestSpeaker.getTranslation().plus(dif.times(distMeters)),
             // Rotation is inverse of distance norm
             new Rotation2d(-dif.getX(), -dif.getY())));
     System.out.println(drivetrain.get());
