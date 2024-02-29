@@ -57,8 +57,10 @@ public class Drivetrain extends SubsystemBase {
 
   /* Sensors */
   private HazardVision vision;
+  private boolean useVision = false;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
+  private boolean useIMU = true;
 
   /* Constants */
   private double wheelRadMeters = 0.1524;
@@ -67,7 +69,7 @@ public class Drivetrain extends SubsystemBase {
   private double gearRatio = 8.46;
   private DifferentialDriveKinematics kinematics;
 
-  private double kP = 0;
+  private double kP = 0.000;
   private double kI = 0;
   private double kD = 0;
   private double kF = 0;
@@ -103,10 +105,19 @@ public class Drivetrain extends SubsystemBase {
     estimator =
         new DifferentialDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(0), 0, 0, initial);
     position = initial;
-    vision = new HazardVision();
+    if (useVision) {
+      vision = new HazardVision();
+    } else {
+      vision = null;
+    }
+    if (useIMU) {
     imu = new ADIS16470_IMU();
     imu.configCalTime(ADIS16470_IMU.CalibrationTime._128ms);
     imu.calibrate();
+    }
+    else {
+      imu = null;
+    }
     Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
     Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
 
@@ -202,9 +213,11 @@ public class Drivetrain extends SubsystemBase {
 
   /** Get the robot's speed and direction */
   public Pose2d get() {
-    Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
-    if (!o.isEmpty()) {
-      position = o.get().estimatedPose.toPose2d();
+    if (useVision) {
+        Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
+        if (!o.isEmpty()) {
+        position = o.get().estimatedPose.toPose2d();
+      }
     }
     return position;
   }
@@ -236,8 +249,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double[] setVelocity(double lVel, double rVel) {
-    SmartDashboard.putNumber("Left target:", lVel);
-    SmartDashboard.putNumber("Right target:", rVel);
+    //SmartDashboard.putNumber("Left target:", lVel);
+    //SmartDashboard.putNumber("Right target:", rVel);
     // velocity (m/s) / circumference of wheel * 4096 encoder units per rotation / 10 (u/100ms)
     double lEncoderSpeed = (lVel * gearRatio * 42) / wheelCircumMeters;
     double rEncoderSpeed = (rVel * gearRatio * 42) / wheelCircumMeters;
@@ -268,11 +281,13 @@ public class Drivetrain extends SubsystemBase {
       loop = 0;
     }*/
 
+    if (useIMU) {
     estimator.update(
         new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
         new DifferentialDriveWheelPositions(
             leftF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters,
             rightF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters));
+    }
 
     /*
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);

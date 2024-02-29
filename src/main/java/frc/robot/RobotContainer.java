@@ -60,6 +60,7 @@ public class RobotContainer {
   private final HazardXbox m_secondaryController =
       new HazardXbox(OperatorConstants.kSecondaryControllerPort);
   private final Trigger x = m_secondaryController.x();
+  private final Trigger y = m_secondaryController.y();
   private final Trigger b = m_secondaryController.b();
   private final Trigger rightTrigger = m_secondaryController.rightTrigger();
   private final Joystick m_driverJoystick =
@@ -160,7 +161,7 @@ public class RobotContainer {
                   b.getAsBoolean());
 
               //Robot error on X press with conveyor enabled
-              if (x.getAsBoolean()) {
+              if (x.getAsBoolean() || y.getAsBoolean()) {
                 intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
                 intake.setConveyor(0);
