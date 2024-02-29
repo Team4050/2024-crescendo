@@ -69,6 +69,7 @@ public class Drivetrain extends SubsystemBase {
   private double gearRatio = 8.45;
   private double encoderToMeters = wheelCircumMeters / (42.0 * gearRatio);
   public DifferentialDriveKinematics kinematics;
+  //Robot weight is 95.7lbs
 
   //
   private double kP = 0.0016;
