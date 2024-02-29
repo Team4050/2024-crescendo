@@ -159,6 +159,7 @@ public class RobotContainer {
                   rightTrigger.getAsBoolean(),
                   b.getAsBoolean());
 
+              //Robot error on X press with conveyor enabled
               if (x.getAsBoolean()) {
                 intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
