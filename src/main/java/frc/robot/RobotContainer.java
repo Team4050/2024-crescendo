@@ -209,7 +209,7 @@ public class RobotContainer {
         break;
     }*/
     //TODO: close resource since we're not using it twice in one run?
-    autoChooser.close();
+    //autoChooser.close();
     //c = new TestAuto(drivetrain);
     return c;
   }

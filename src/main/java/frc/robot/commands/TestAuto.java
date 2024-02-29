@@ -52,8 +52,8 @@ public class TestAuto extends Command {
   @Override
   public void execute() {
     drive.follow(trajectory, timer.get());
-    State s = trajectory.sample(timer.get());
-    loop++;
+    //State s = trajectory.sample(timer.get());
+    /*loop++;
     if (loop > 500) {
       System.out.println(
           "Target: "
@@ -69,7 +69,7 @@ public class TestAuto extends Command {
               + drive.get().getY()
               + " "
               + drive.get().getRotation().getDegrees());
-    }
+    }*/
   }
 
   @Override

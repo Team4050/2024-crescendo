@@ -262,11 +262,11 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     super.periodic();
 
-    loop++;
-    if (loop > 200) {
+    //loop++;
+    /*if (loop > 200) {
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
-    }
+    }*/
 
     estimator.update(
         new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
