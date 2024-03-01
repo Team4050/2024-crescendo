@@ -40,7 +40,7 @@ public final class Constants {
   ;
 
   public static class MotorDriveValues {
-    public static final double shooterSpeed = -0.6;
+    public static final double shooterSpeed = -0.56;
     public static final double shooterSpeed2 = -0.75;
     public static final double intakeSpeed = 0.2;
     public static final double conveyorSpeed = -0.7;

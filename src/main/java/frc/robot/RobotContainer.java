@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -68,6 +69,8 @@ public class RobotContainer {
   private final Joystick m_driverJoystick =
       new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
+  private double adjustedShooterSpeed = 0.6;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -75,6 +78,9 @@ public class RobotContainer {
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
     intake = new Intake();
     shooter = new Gun();
+
+    //SmartDashboard.putData("Shooter speed", 1);
+    SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeed);
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
@@ -193,7 +199,7 @@ public class RobotContainer {
         if (x.getAsBoolean()) {
           shooter.fire(Constants.MotorDriveValues.shooterSpeed);
         } else if (y.getAsBoolean()) {
-          shooter.fire(Constants.MotorDriveValues.shooterSpeed2);
+          shooter.fire(-adjustedShooterSpeed);
         } else {
           shooter.fire(0);
         }
@@ -213,6 +219,7 @@ public class RobotContainer {
 
   public void chooseControls() {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
+    adjustedShooterSpeed = SmartDashboard.getNumber("shooter", 0);
     /*switch (driveControlChooser.getSelected()) {
       case "def":
         drivetrain.setDefaultCommand(drivetrainDefault);
