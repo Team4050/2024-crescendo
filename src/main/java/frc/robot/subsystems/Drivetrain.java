@@ -60,7 +60,7 @@ public class Drivetrain extends SubsystemBase {
   private boolean useVision = false;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
-  private boolean useIMU = true;
+  private boolean useIMU = false;
 
   /* Constants */
   private double wheelRadMeters = 0.1524;
@@ -69,10 +69,10 @@ public class Drivetrain extends SubsystemBase {
   private double gearRatio = 8.46;
   private DifferentialDriveKinematics kinematics;
 
-  private double kP = 0.000;
+  private double kP = 0.0016;
   private double kI = 0;
-  private double kD = 0;
-  private double kF = 0;
+  private double kD = 0.0000001;
+  private double kF = 0.00004;
 
   public Drivetrain(Pose2d initial) {
     leftF = new CANSparkMax(Constants.MotorCANValues.leftMotorFront, MotorType.kBrushless);
@@ -275,8 +275,8 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     super.periodic();
 
-    //loop++;
-    /*if (loop > 200) {
+    /*loop++;
+    if (loop > 200) {
       System.out.println("imu yaw: " + imu.getAngle(IMUAxis.kYaw));
       loop = 0;
     }*/

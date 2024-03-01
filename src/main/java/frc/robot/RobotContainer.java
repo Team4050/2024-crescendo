@@ -48,6 +48,7 @@ public class RobotContainer {
 
   private final RunCommand drivetrainDefault;
   private final RunCommand drivetrainRamp;
+  private final RunCommand drivetrainRampDefensive;
   private final RunCommand drivetrainFStickDefault;
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
@@ -62,6 +63,7 @@ public class RobotContainer {
   private final Trigger x = m_secondaryController.x();
   private final Trigger y = m_secondaryController.y();
   private final Trigger b = m_secondaryController.b();
+  private final Trigger mb = m_driverController.b();
   private final Trigger rightTrigger = m_secondaryController.rightTrigger();
   private final Joystick m_driverJoystick =
       new Joystick(OperatorConstants.kDriverFStickControllerPort);
@@ -76,6 +78,7 @@ public class RobotContainer {
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
+    autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
 
@@ -103,6 +106,21 @@ public class RobotContainer {
               drivetrain.set((f + t), (f - t));
             },
             drivetrain);
+    drivetrainRampDefensive = 
+        new RunCommand(
+          () -> {
+              double f = -m_driverController.getLeftY();
+              double t = 0;
+              if (mb.getAsBoolean()) {
+                 t = m_driverController.getRightX(); 
+              } else {
+                t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
+              }
+              if (reverse) {
+                f = -f;
+              }
+              drivetrain.set((f + t), (f - t));
+        }, drivetrain);
     drivetrainFStickDefault =
         new RunCommand(
             () -> {
@@ -146,6 +164,7 @@ public class RobotContainer {
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
+    driveControlChooser.addOption("Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
     driveControlChooser.addOption(
         "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
@@ -173,6 +192,8 @@ public class RobotContainer {
       () -> {
         if (x.getAsBoolean()) {
           shooter.fire(Constants.MotorDriveValues.shooterSpeed);
+        } else if (y.getAsBoolean()) {
+          shooter.fire(Constants.MotorDriveValues.shooterSpeed2);
         } else {
           shooter.fire(0);
         }
@@ -192,6 +213,26 @@ public class RobotContainer {
 
   public void chooseControls() {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
+    /*switch (driveControlChooser.getSelected()) {
+      case "def":
+        drivetrain.setDefaultCommand(drivetrainDefault);
+        break;
+      case "defRamp":
+        drivetrain.setDefaultCommand(drivetrainRamp);
+        break;
+      case "fstick":
+        drivetrain.setDefaultCommand(drivetrainFStickDefault);
+        break;
+      case "arcade1stick":
+        drivetrain.setDefaultCommand(drivetrainArcade1Stick);
+        break;
+      case "tank":
+        drivetrain.setDefaultCommand(drivetrainTank);
+        break;
+      default:
+        drivetrain.setDefaultCommand(drivetrainDefault);
+        break;
+    }*/
   }
 
   /**
@@ -206,8 +247,11 @@ public class RobotContainer {
       case "defaultAuto":
         return new TestAuto(drivetrain);
         break;
-    
+      case "nothing":
+        return new RunCommand(() -> {}, drivetrain);
+        break;
       default:
+        return new RunCommand(() -> {}, drivetrain);
         break;
     }*/
     //TODO: close resource since we're not using it twice in one run?
