@@ -24,7 +24,6 @@ import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N5;
-// import edu.wpi.first.math.proto.System;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
@@ -60,8 +59,10 @@ public class Drivetrain extends SubsystemBase {
 
   /* Sensors */
   private HazardVision vision;
+  private boolean useVision = false;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
+  private boolean useIMU = false;
 
   /* Constants */
   private double wheelRadMeters = 0.0762;
@@ -112,10 +113,19 @@ public class Drivetrain extends SubsystemBase {
 
     kinematics = new DifferentialDriveKinematics(0.42545);
     position = initial;
-    vision = new HazardVision();
+    if (useVision) {
+      vision = new HazardVision();
+    } else {
+      vision = null;
+    }
+    if (useIMU) {
     imu = new ADIS16470_IMU();
     imu.configCalTime(ADIS16470_IMU.CalibrationTime._128ms);
     imu.calibrate();
+    }
+    else {
+      imu = null;
+    }
     Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
     Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
 
@@ -220,9 +230,11 @@ public class Drivetrain extends SubsystemBase {
 
   /** Get the robot's speed and direction */
   public Pose2d get() {
-    Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
-    if (!o.isEmpty()) {
-      position = o.get().estimatedPose.toPose2d();
+    if (useVision) {
+        Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
+        if (!o.isEmpty()) {
+        position = o.get().estimatedPose.toPose2d();
+      }
     }
     return position;
   }
@@ -241,8 +253,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double[] setVelocity(double lVel, double rVel) {
-    SmartDashboard.putNumber("Left target:", lVel);
-    SmartDashboard.putNumber("Right target:", rVel);
+    //SmartDashboard.putNumber("Left target:", lVel);
+    //SmartDashboard.putNumber("Right target:", rVel);
+    // velocity (m/s) / circumference of wheel * 42 encoder units per rotation / 10 (u/100ms)
 
     double lEncoderSpeed = lVel / (encoderToMeters);
     double rEncoderSpeed = rVel / (encoderToMeters);

@@ -31,20 +31,20 @@ public class TestAuto extends Command {
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
+        new TrajectoryConfig(Units.MetersPerSecond.of(1), Units.MetersPerSecondPerSecond.of(1));
     super.initialize();
     timer = new Timer();
     timer.start();
-    ArrayList<Translation2d> list = new ArrayList<Translation2d>();
+    ArrayList<Pose2d> list = new ArrayList<Pose2d>();
     // 3.93954
-    list.add(drive.get().getTranslation().plus(new Translation2d(1.9, 0)));
+    //drive.set(0.9, 0.9);
+    list.add(new Pose2d(0, 0, new Rotation2d()));
+    list.add(new Pose2d(1.0, 0, new Rotation2d()));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
-            drive.get(),
             list,
-            drive.get().plus(new Transform2d(1.9, 0, new Rotation2d())),
             tconfig);
-    end = timer.get() + trajectory.getTotalTimeSeconds() + 2.5;
+    end = timer.get() + 0.7;
     // 3 means 11 inches
   }
 
