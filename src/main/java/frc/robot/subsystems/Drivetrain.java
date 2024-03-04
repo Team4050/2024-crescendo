@@ -134,17 +134,18 @@ public class Drivetrain extends SubsystemBase {
     System.out.println(maxV);
 
     // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1
-    // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia, solid rectangular cuboid
-    // 1/12 * m * (h^2 + w^2) = ~3.47524
+    // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia (wikipedia as source lol),
+    // Solid rectangular cuboid model:
+    // 1/12 * m * (h^2 + w^2)
+    System.out.println(0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)));
     LinearSystem<N2, N2, N2> plant =
         buildPlant(Constants.RobotConstants.wheelRadMeters, 
             0.27305,
-            1 / RobotConstants.gearRatio, 
-            1 / RobotConstants.gearRatio, 
-            1/12 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
+            RobotConstants.gearRatio, 
+            RobotConstants.gearRatio, 
+            0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
-            1,
-            1, 
+            100, 
             1, 
             1);
 
@@ -177,7 +178,6 @@ public class Drivetrain extends SubsystemBase {
       double Gr,
       double J,
       double m,
-      double Kt,
       double Kv,
       double Rl,
       double Rr) {
@@ -193,7 +193,7 @@ public class Drivetrain extends SubsystemBase {
      *
      * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
      * J = moment of inertia  m = robot mass
-     * Kt = input gain, Kv = system gain
+     * Kt = motor torque constant, Kv = free spinning rpm at 1 V
      * R = motor resistance (left/right)
      * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
      * C1 = -Gl^2 * Kt / Kv * R * r^2
@@ -210,7 +210,17 @@ public class Drivetrain extends SubsystemBase {
      * System matrix
      * B = [ c1 * C2  c2 * C4 ]
      *     [ c2 * C2  c1 * C4 ]
+     * 
+     * Kv for NEO is 917 under no load
+     * TODO: test under load
+     * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
+     * https://www.revrobotics.com/content/docs/REV-21-1651-DS.pdf
+     * 
+     * determining Kt is simply an inversion of Kv and a unit conversion, or stall torque over stall current
+     * Kt = 60 / 2pi * Kv
+     * https://electronics.stackexchange.com/questions/531406/how-to-calculate-the-torque-constant-for-a-bldc-motor
      */
+    double Kt = 60 / (2 * Math.PI * Kv);
     double C1 = -Math.pow(Gl, 2) * Kt / (Rl * Kv * Math.pow(r, 2));
     double C2 = Gl * Kt / (Rl * r);
     double C3 = -Math.pow(Gr, 2) * Kt / (Rr * Kv * Math.pow(r, 2));
@@ -218,6 +228,7 @@ public class Drivetrain extends SubsystemBase {
     double c1 = 1 / m + (Math.pow(rb, 2) / J);
     double c2 = 1 / m - (Math.pow(rb, 2) / J);
 
+    System.out.println(Kt);
     System.out.println("constants: " + c1 + " " + c2);
 
     Matrix<N2, N2> A =
@@ -257,6 +268,11 @@ public class Drivetrain extends SubsystemBase {
     // leftR.set(lSpeed);
     rightF.set(rSpeed);
     // rightR.set(rSpeed);
+  }
+
+  public void setV(double lVolts, double rVolts) {
+    leftF.setVoltage(lVolts);
+    leftR.setVoltage(rVolts);
   }
 
   public double[] setVelocity(double lVel, double rVel) {

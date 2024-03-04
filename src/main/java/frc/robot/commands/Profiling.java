@@ -10,12 +10,14 @@ public class Profiling extends Command {
     private HazardXbox controller;
     private Timer timer;
 
-    private double[] xl = new double[1000];
-    private double[] yl = new double[1000];
-    private double[] xr = new double[1000];
-    private double[] yr = new double[1000];
+    private double[] xl = new double[8192];
+    private double[] yl = new double[8192];
+    private double[] xr = new double[8192];
+    private double[] yr = new double[8192];
     private int samplesl = 0;
     private int samplesr = 0;
+
+    private double voltage = 0;
 
     Profiling(Drivetrain drivetrain, HazardXbox controller) {
         this.drivetrain = drivetrain;
@@ -32,8 +34,15 @@ public class Profiling extends Command {
         super.initialize();
     }
 
+    // Quasi-static determination 
+    // https://www.chiefdelphi.com/t/paper-frc-drivetrain-characterization/160915
+    // Section 4.2
+    //
     @Override
     public void execute() {
+        voltage += 0.0015;
+        drivetrain.setV(voltage, voltage);
+
         double[] encoderSpeeds = drivetrain.getEncoderV();
 
         xl[samplesl] = timer.get();
@@ -89,6 +98,7 @@ public class Profiling extends Command {
         System.out.println("Regression results:");
         System.out.println("Left A, B: " + Al + " " + Bl);
         System.out.println("Right A, B: " + Ar + " " + Br);
+        System.out.println("L, R X intercept: " + (Al / Bl) + " " + (Ar / Br));
 
         // TODO Auto-generated method stub
         super.end(interrupted);
