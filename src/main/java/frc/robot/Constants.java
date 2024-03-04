@@ -15,6 +15,8 @@ import edu.wpi.first.math.geometry.Transform3d;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final boolean logging = false;
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kSecondaryControllerPort = 1;

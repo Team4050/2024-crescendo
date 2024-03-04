@@ -7,14 +7,11 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -79,7 +76,7 @@ public class RobotContainer {
     intake = new Intake();
     shooter = new Gun();
 
-    //SmartDashboard.putData("Shooter speed", 1);
+    // SmartDashboard.putData("Shooter speed", 1);
     SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeed);
 
     autoChooser = new SendableChooser<Command>();
@@ -112,13 +109,13 @@ public class RobotContainer {
               drivetrain.set((f + t), (f - t));
             },
             drivetrain);
-    drivetrainRampDefensive = 
+    drivetrainRampDefensive =
         new RunCommand(
-          () -> {
+            () -> {
               double f = -m_driverController.getLeftY();
               double t = 0;
               if (mb.getAsBoolean()) {
-                 t = m_driverController.getRightX(); 
+                t = m_driverController.getRightX();
               } else {
                 t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
               }
@@ -126,7 +123,8 @@ public class RobotContainer {
                 f = -f;
               }
               drivetrain.set((f + t), (f - t));
-        }, drivetrain);
+            },
+            drivetrain);
     drivetrainFStickDefault =
         new RunCommand(
             () -> {
@@ -143,12 +141,12 @@ public class RobotContainer {
             () -> {
               if (reverse) {
                 drivetrain.set(
-                  Math.log(-m_driverController.getLeftY() + Math.E) - 1,
-                  Math.log(m_driverController.getRightY() + Math.E) - 1);
+                    Math.log(-m_driverController.getLeftY() + Math.E) - 1,
+                    Math.log(m_driverController.getRightY() + Math.E) - 1);
               } else {
                 drivetrain.set(
-                  Math.log(m_driverController.getLeftY() + Math.E) - 1,
-                  Math.log(-m_driverController.getRightY() + Math.E) - 1);
+                    Math.log(m_driverController.getLeftY() + Math.E) - 1,
+                    Math.log(-m_driverController.getRightY() + Math.E) - 1);
               }
             },
             drivetrain);
@@ -170,7 +168,8 @@ public class RobotContainer {
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
-    driveControlChooser.addOption("Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
+    driveControlChooser.addOption(
+        "Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
     driveControlChooser.addOption(
         "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
@@ -181,11 +180,9 @@ public class RobotContainer {
     intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(
-                  rightTrigger.getAsBoolean(),
-                  b.getAsBoolean());
+              intake.setIntake(rightTrigger.getAsBoolean(), b.getAsBoolean());
 
-              //Robot error on X press with conveyor enabled
+              // Robot error on X press with conveyor enabled
               if (x.getAsBoolean() || y.getAsBoolean()) {
                 intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
@@ -195,15 +192,16 @@ public class RobotContainer {
             intake));
     shooter.setDefaultCommand(
         new RunCommand(
-      () -> {
-        if (x.getAsBoolean()) {
-          shooter.fire(Constants.MotorDriveValues.shooterSpeed);
-        } else if (y.getAsBoolean()) {
-          shooter.fire(-adjustedShooterSpeed);
-        } else {
-          shooter.fire(0);
-        }
-      }, shooter));
+            () -> {
+              if (x.getAsBoolean()) {
+                shooter.fire(Constants.MotorDriveValues.shooterSpeed);
+              } else if (y.getAsBoolean()) {
+                shooter.fire(-adjustedShooterSpeed);
+              } else {
+                shooter.fire(0);
+              }
+            },
+            shooter));
   }
 
   /**
@@ -249,7 +247,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     Command c = autoChooser.getSelected();
-    //TODO: Use this code if fetching from chooser fails
+    // TODO: Use this code if fetching from chooser fails
     /*switch (c) {
       case "defaultAuto":
         return new TestAuto(drivetrain);
@@ -261,9 +259,9 @@ public class RobotContainer {
         return new RunCommand(() -> {}, drivetrain);
         break;
     }*/
-    //TODO: close resource since we're not using it twice in one run?
-    //autoChooser.close();
-    //c = new TestAuto(drivetrain);
+    // TODO: close resource since we're not using it twice in one run?
+    // autoChooser.close();
+    // c = new TestAuto(drivetrain);
     return c;
   }
 }

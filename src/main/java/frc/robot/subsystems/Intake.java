@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase {
     return breakbeam.get();
   }
 
-  //TODO: Remove
+  // TODO: Remove
   int loop = 0;
 
   @Override

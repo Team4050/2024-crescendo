@@ -11,13 +11,11 @@ import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 import edu.wpi.first.math.controller.LTVDifferentialDriveController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
@@ -30,7 +28,6 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.hazard.HazardVision;
@@ -111,11 +108,10 @@ public class Drivetrain extends SubsystemBase {
       vision = null;
     }
     if (useIMU) {
-    imu = new ADIS16470_IMU();
-    imu.configCalTime(ADIS16470_IMU.CalibrationTime._128ms);
-    imu.calibrate();
-    }
-    else {
+      imu = new ADIS16470_IMU();
+      imu.configCalTime(ADIS16470_IMU.CalibrationTime._128ms);
+      imu.calibrate();
+    } else {
       imu = null;
     }
     Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
@@ -166,7 +162,7 @@ public class Drivetrain extends SubsystemBase {
      *     [ Vr ]
      *
      * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
-     * J = moment of inertia  m = robot mass TODO:figure out mass of current robot, 80lbs limit, 36.28736kg
+     * J = moment of inertia  m = robot mass
      * Kt = input gain, Kv = system gain
      * R = motor resistance (left/right)
      * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
@@ -192,7 +188,9 @@ public class Drivetrain extends SubsystemBase {
     double c1 = 1 / m + (Math.pow(rb, 2) / J);
     double c2 = 1 / m - (Math.pow(rb, 2) / J);
 
-    System.out.println("constants: " + c1 + " " + c2);
+    if (Constants.logging) {
+      System.out.println("constants: " + c1 + " " + c2);
+    }
 
     Matrix<N2, N2> A =
         MatBuilder.fill(N2.instance, N2.instance, c1 * C1, c2 * C3, c2 * C1, c1 * C3);
@@ -214,8 +212,8 @@ public class Drivetrain extends SubsystemBase {
   /** Get the robot's speed and direction */
   public Pose2d get() {
     if (useVision) {
-        Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
-        if (!o.isEmpty()) {
+      Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
+      if (!o.isEmpty()) {
         position = o.get().estimatedPose.toPose2d();
       }
     }
@@ -249,8 +247,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double[] setVelocity(double lVel, double rVel) {
-    //SmartDashboard.putNumber("Left target:", lVel);
-    //SmartDashboard.putNumber("Right target:", rVel);
+    // SmartDashboard.putNumber("Left target:", lVel);
+    // SmartDashboard.putNumber("Right target:", rVel);
     // velocity (m/s) / circumference of wheel * 4096 encoder units per rotation / 10 (u/100ms)
     double lEncoderSpeed = (lVel * gearRatio * 42) / wheelCircumMeters;
     double rEncoderSpeed = (rVel * gearRatio * 42) / wheelCircumMeters;
@@ -282,11 +280,11 @@ public class Drivetrain extends SubsystemBase {
     }*/
 
     if (useIMU) {
-    estimator.update(
-        new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
-        new DifferentialDriveWheelPositions(
-            leftF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters,
-            rightF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters));
+      estimator.update(
+          new Rotation2d(imu.getAngle(IMUAxis.kYaw) + Math.toRadians(180)),
+          new DifferentialDriveWheelPositions(
+              leftF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters,
+              rightF.getAbsoluteEncoder(Type.kDutyCycle).getPosition() * encoderToMeters));
     }
 
     /*
@@ -301,11 +299,11 @@ public class Drivetrain extends SubsystemBase {
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
     /*DifferentialDriveWheelVoltages dv =
-        controller.calculate(
-            position,
-            leftF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
-            rightF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
-            p);*/
+    controller.calculate(
+        position,
+        leftF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
+        rightF.getAbsoluteEncoder(Type.kDutyCycle).getVelocity() * encoderToMeters,
+        p);*/
     ChassisSpeeds speeds = ramController.calculate(position, p);
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     setVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);

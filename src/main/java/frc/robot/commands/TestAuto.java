@@ -2,9 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.units.Units;
@@ -39,10 +37,7 @@ public class TestAuto extends Command {
     drive.set(0.9, 0.9);
     list.add(new Pose2d(0, 0, new Rotation2d()));
     list.add(new Pose2d(1.0, 0, new Rotation2d()));
-    trajectory =
-        TrajectoryGenerator.generateTrajectory(
-            list,
-            tconfig);
+    trajectory = TrajectoryGenerator.generateTrajectory(list, tconfig);
     end = timer.get() + 0.7;
     // 3 means 11 inches
   }
@@ -51,9 +46,9 @@ public class TestAuto extends Command {
 
   @Override
   public void execute() {
-    //drive.follow(trajectory, timer.get());
+    // drive.follow(trajectory, timer.get());
     drive.set(1.0, 1.0);
-    //State s = trajectory.sample(timer.get());
+    // State s = trajectory.sample(timer.get());
     /*loop++;
     if (loop > 500) {
       System.out.println(
@@ -75,8 +70,8 @@ public class TestAuto extends Command {
 
   @Override
   public void end(boolean interrupted) {
-      drive.set(0, 0);
-      super.end(interrupted);
+    drive.set(0, 0);
+    super.end(interrupted);
   }
 
   @Override
