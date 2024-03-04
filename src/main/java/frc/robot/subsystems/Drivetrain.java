@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotConstants;
 import frc.robot.hazard.HazardVision;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
@@ -65,10 +66,6 @@ public class Drivetrain extends SubsystemBase {
   private boolean useIMU = false;
 
   /* Constants */
-  private double wheelRadMeters = 0.0762;
-  private double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
-  private double gearRatio = 8.45;
-  private double encoderToMeters = wheelCircumMeters / (42.0 * gearRatio);
   public DifferentialDriveKinematics kinematics;
   //Robot weight is 95.7lbs
 
@@ -120,8 +117,9 @@ public class Drivetrain extends SubsystemBase {
     }
     if (useIMU) {
     imu = new ADIS16470_IMU();
-    imu.configCalTime(ADIS16470_IMU.CalibrationTime._128ms);
+    imu.configCalTime(ADIS16470_IMU.CalibrationTime._4s);
     imu.calibrate();
+    
     }
     else {
       imu = null;
@@ -136,17 +134,28 @@ public class Drivetrain extends SubsystemBase {
     System.out.println(maxV);
 
     // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1
+    // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia, solid rectangular cuboid
+    // 1/12 * m * (h^2 + w^2) = ~3.47524
     LinearSystem<N2, N2, N2> plant =
-        buildPlant(0.0762, 0.27305, 0.118, 0.118, 5.0, 40.0, 1, 1, 1, 1);
+        buildPlant(Constants.RobotConstants.wheelRadMeters, 
+            0.27305,
+            1 / RobotConstants.gearRatio, 
+            1 / RobotConstants.gearRatio, 
+            1/12 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
+            RobotConstants.robotMassKG, 
+            1,
+            1, 
+            1, 
+            1);
 
-    controller = new LTVDifferentialDriveController(plant, 0.508, qelems, relems, 0.02);
+    controller = new LTVDifferentialDriveController(plant, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
     estimator =
         new DifferentialDrivePoseEstimator(
             kinematics,
-            new Rotation2d(Math.toRadians(imu.getAngle() + 90)),
-            leftEncoder.getPosition() * encoderToMeters,
-            rightEncoder.getPosition() * encoderToMeters,
+            getTransformedIMU(),
+            leftEncoder.getPosition() * RobotConstants.encoderToMeters,
+            rightEncoder.getPosition() * RobotConstants.encoderToMeters,
             initial);
 
     // Ramsete controller tuning for meters is 2.0 & 0.7
@@ -183,7 +192,7 @@ public class Drivetrain extends SubsystemBase {
      *     [ Vr ]
      *
      * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
-     * J = moment of inertia  m = robot mass TODO:figure out mass of current robot, 80lbs limit, 36.28736kg
+     * J = moment of inertia  m = robot mass
      * Kt = input gain, Kv = system gain
      * R = motor resistance (left/right)
      * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
@@ -230,13 +239,11 @@ public class Drivetrain extends SubsystemBase {
 
   /** Get the robot's speed and direction */
   public Pose2d get() {
-    if (useVision) {
-        Optional<EstimatedRobotPose> o = vision.getEstimatedGlobalPose(position);
-        if (!o.isEmpty()) {
-        position = o.get().estimatedPose.toPose2d();
-      }
-    }
     return position;
+  }
+
+  public double[] getEncoderV() {
+    return new double[] {leftEncoder.getVelocity(), rightEncoder.getVelocity()};
   }
 
   /**
@@ -257,8 +264,8 @@ public class Drivetrain extends SubsystemBase {
     //SmartDashboard.putNumber("Right target:", rVel);
     // velocity (m/s) / circumference of wheel * 42 encoder units per rotation / 10 (u/100ms)
 
-    double lEncoderSpeed = lVel / (encoderToMeters);
-    double rEncoderSpeed = rVel / (encoderToMeters);
+    double lEncoderSpeed = lVel / (RobotConstants.encoderToMeters);
+    double rEncoderSpeed = rVel / (RobotConstants.encoderToMeters);
 
     leftControl.setReference(lEncoderSpeed, ControlType.kVelocity);
     rightControl.setReference(rEncoderSpeed, ControlType.kVelocity);
@@ -267,6 +274,7 @@ public class Drivetrain extends SubsystemBase {
             + (lEncoderSpeed - leftEncoder.getVelocity())
             + " "
             + (rEncoderSpeed - rightEncoder.getVelocity()));
+
     // System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " +
     // rightEncoder.getVelocity());
     // System.out.println("Measured encoder positions: " + leftEncoder.getPosition() + " " +
@@ -287,7 +295,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getTransformedIMU() {
-    return new Rotation2d(Math.toRadians(imu.getAngle(Constants.Sensors.robotYawAxis) + Constants.Sensors.axisCorrectionDegrees));
+    return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
   }
 
   public void setIMU(double yaw) {
@@ -319,8 +327,8 @@ public class Drivetrain extends SubsystemBase {
         estimator.update(
             getTransformedIMU(),
             new DifferentialDriveWheelPositions(
-                -leftEncoder.getPosition() * encoderToMeters,
-                -rightEncoder.getPosition() * encoderToMeters));
+                -leftEncoder.getPosition() * RobotConstants.encoderToMeters,
+                -rightEncoder.getPosition() * RobotConstants.encoderToMeters));
 
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
