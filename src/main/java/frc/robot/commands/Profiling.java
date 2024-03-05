@@ -48,12 +48,12 @@ public class Profiling extends Command {
             loop = 0;
         }
         double clamp = voltage;
-        if (clamp > 1) {
-            clamp = 1;
+        if (clamp > 12) {
+            clamp = 12;
         }
 
         drivetrain.setVelocity(clamp, clamp);
-        drivetrain.set(clamp, clamp);
+        //drivetrain.set(clamp / 12, clamp / 12);
 
         double[] encoderSpeeds = drivetrain.getEncoderV();
 
