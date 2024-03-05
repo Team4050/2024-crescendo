@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -46,6 +47,8 @@ public class Drivetrain extends SubsystemBase {
   private CANSparkMax rightR;
 
   /* Controls */
+  private IdleMode idleMode = IdleMode.kCoast;
+
   private LTVDifferentialDriveController controller;
   private RamseteController ramController;
 
@@ -60,10 +63,13 @@ public class Drivetrain extends SubsystemBase {
 
   /* Sensors */
   private HazardVision vision;
-  private boolean useVision = false;
+  private boolean useVision = true;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
   private boolean useIMU = false;
+
+  private CANcoder leftExternalEncoder;
+  private CANcoder rightExternalEncoder;
 
   /* Constants */
   public DifferentialDriveKinematics kinematics;
@@ -85,18 +91,24 @@ public class Drivetrain extends SubsystemBase {
     rightR.follow(rightF);
 
     rightF.setInverted(true);
+    rightR.setInverted(true);
     leftF.setInverted(false);
+    leftR.setInverted(false);
 
-    leftF.setIdleMode(IdleMode.kBrake);
-    leftR.setIdleMode(IdleMode.kBrake);
-    rightF.setIdleMode(IdleMode.kBrake);
-    rightR.setIdleMode(IdleMode.kBrake);
+    leftF.setIdleMode(idleMode);
+    leftR.setIdleMode(idleMode);
+    rightF.setIdleMode(idleMode);
+    rightR.setIdleMode(idleMode);
 
     leftEncoder = leftF.getEncoder();
     rightEncoder = rightF.getEncoder();
 
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
+
+    // TODO: Attach external encoders
+    // leftExternalEncoder = new CANcoder(Constants.MotorCANValues.cancoderLeft);
+    // rightExternalEncoder = new CANcoder(Constants.MotorCANValues.cancoderRight);
 
     leftControl.setP(kP);
     leftControl.setI(kI);
@@ -154,7 +166,7 @@ public class Drivetrain extends SubsystemBase {
     estimator =
         new DifferentialDrivePoseEstimator(
             kinematics,
-            getTransformedIMU(),
+            new Rotation2d(),
             leftEncoder.getPosition() * RobotConstants.encoderToMeters,
             rightEncoder.getPosition() * RobotConstants.encoderToMeters,
             initial);
@@ -270,9 +282,20 @@ public class Drivetrain extends SubsystemBase {
     // rightR.set(rSpeed);
   }
 
+  // setVoltage and setReference should be the same thing, but the follower API may be causing issues
+  // https://www.chiefdelphi.com/t/sparkmax-api-set-current-set-voltage-calls/385160/7
   public void setV(double lVolts, double rVolts) {
-    leftF.setVoltage(lVolts);
-    leftR.setVoltage(rVolts);
+    leftControl.setReference(lVolts, ControlType.kVoltage);
+    rightControl.setReference(rVolts, ControlType.kVelocity);
+    //leftF.setVoltage(lVolts);
+    //leftR.setVoltage(lVolts);
+    //rightF.setVoltage(rVolts);
+    //rightR.setVoltage(rVolts);
+  }
+
+  public void setVcontrol(double lVolts, double rVolts) {
+    leftControl.setReference(lVolts, ControlType.kVoltage);
+    rightControl.setReference(rVolts, ControlType.kVoltage);
   }
 
   public double[] setVelocity(double lVel, double rVel) {
@@ -311,11 +334,12 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getTransformedIMU() {
-    return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
+    return new Rotation2d();
+    //return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
   }
 
   public void setIMU(double yaw) {
-    imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw - Constants.Sensors.axisCorrectionDegrees);
+    //imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw - Constants.Sensors.axisCorrectionDegrees);
   }
 
   public void setPose(Pose2d manual) {
@@ -330,8 +354,13 @@ public class Drivetrain extends SubsystemBase {
 
     loop++;
     if (loop > 50) {
-      System.out.println(position);
-      System.out.println("imu yaw: " + getTransformedIMU());
+      System.out.println("LeftF duty cycle, bus voltage: " + leftF.getAppliedOutput() + " " + leftF.getBusVoltage());
+      System.out.println("LeftR duty cycle, bus voltage: " + leftR.getAppliedOutput() + " " + leftR.getBusVoltage());
+      System.out.println("RightF duty cycle, bus voltage: " + rightF.getAppliedOutput() + " " + rightF.getBusVoltage());
+      System.out.println("RightR duty cycle, bus voltage: " + rightR.getAppliedOutput() + " " + rightR.getBusVoltage());
+
+      //System.out.println(position);
+      //System.out.println("imu yaw: " + getTransformedIMU());
       loop = 0;
     }
 

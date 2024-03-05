@@ -50,6 +50,9 @@ public final class Constants {
 
     public static final int intake = 6;
     public static final int conveyor = 7;
+
+    public static final int cancoderLeft = 10;
+    public static final int cancoderRight = 11;
   }
   ;
 

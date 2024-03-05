@@ -16,11 +16,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlignShooter;
 import frc.robot.commands.TestAuto;
+import frc.robot.commands.TimeTesting;
+import frc.robot.commands.Profiling;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Gun;
@@ -90,6 +93,13 @@ public class RobotContainer {
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
+    autoChooser.addOption("motor profiling", new Profiling(drivetrain, m_driverController));
+    autoChooser.addOption("Time sequence", 
+        new SequentialCommandGroup(
+            new TimeTesting(drivetrain, 90, true), 
+            new TimeTesting(drivetrain, -90, true),
+            new TimeTesting(drivetrain, 1.0, false),
+            new TimeTesting(drivetrain, -1.0, false)));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
 

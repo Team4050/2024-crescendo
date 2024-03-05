@@ -19,7 +19,7 @@ public class Profiling extends Command {
 
     private double voltage = 0;
 
-    Profiling(Drivetrain drivetrain, HazardXbox controller) {
+    public Profiling(Drivetrain drivetrain, HazardXbox controller) {
         this.drivetrain = drivetrain;
         this.controller = controller;
         timer = new Timer();
@@ -38,10 +38,22 @@ public class Profiling extends Command {
     // https://www.chiefdelphi.com/t/paper-frc-drivetrain-characterization/160915
     // Section 4.2
     //
+    int loop = 0;
     @Override
     public void execute() {
-        voltage += 0.0015;
-        drivetrain.setV(voltage, voltage);
+        voltage += 0.003;
+        loop++;
+        if (loop > 50) {
+            System.out.println("Current voltage: " + voltage);
+            loop = 0;
+        }
+        double clamp = voltage;
+        if (clamp > 1) {
+            clamp = 1;
+        }
+
+        drivetrain.setVelocity(clamp, clamp);
+        drivetrain.set(clamp, clamp);
 
         double[] encoderSpeeds = drivetrain.getEncoderV();
 
@@ -107,6 +119,6 @@ public class Profiling extends Command {
     @Override
     public boolean isFinished() {
         // TODO Auto-generated method stub
-        return super.isFinished();
+        return voltage > 12.5;
     }
 }
