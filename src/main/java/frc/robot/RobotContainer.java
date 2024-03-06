@@ -73,8 +73,8 @@ public class RobotContainer {
   private final Trigger b = m_secondaryController.b();
   private final Trigger mb = m_driverController.b();
   private final Trigger rightTrigger = m_secondaryController.rightTrigger();
-  private final Joystick m_driverJoystick =
-      new Joystick(OperatorConstants.kDriverFStickControllerPort);
+  //private final Joystick m_driverJoystick =
+  //    new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
   private double adjustedShooterSpeed = 0.6;
 
@@ -91,7 +91,7 @@ public class RobotContainer {
     SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeed);
 
     autoChooser = new SendableChooser<Command>();
-    autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
+    autoChooser.setDefaultOption("Default auto: test", new TestAuto(drivetrain));
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
     autoChooser.addOption("motor profiling", new Profiling(drivetrain, m_driverController));
     autoChooser.addOption("Time sequence", 
@@ -142,7 +142,8 @@ public class RobotContainer {
               }
               drivetrain.set((f + t), (f - t));
         }, drivetrain);
-    drivetrainFStickDefault =
+        drivetrainFStickDefault = null;
+    /*drivetrainFStickDefault =
         new RunCommand(
             () -> {
               double f = -m_driverJoystick.getY();
@@ -152,7 +153,7 @@ public class RobotContainer {
               }
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
-            drivetrain);
+            drivetrain);*/
     drivetrainTank =
         new RunCommand(
             () -> {

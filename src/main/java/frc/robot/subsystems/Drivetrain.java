@@ -12,6 +12,7 @@ import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.controller.DifferentialDriveWheelVoltages;
 import edu.wpi.first.math.controller.LTVDifferentialDriveController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
@@ -47,7 +48,7 @@ public class Drivetrain extends SubsystemBase {
   private CANSparkMax rightR;
 
   /* Controls */
-  private IdleMode idleMode = IdleMode.kCoast;
+  private IdleMode idleMode = IdleMode.kBrake;
 
   private LTVDifferentialDriveController controller;
   private RamseteController ramController;
@@ -76,7 +77,7 @@ public class Drivetrain extends SubsystemBase {
   //Robot weight is 95.7lbs
 
   //
-  private double kP = 0.0016;
+  private double kP = 0.002;
   private double kI = 0;
   private double kD = 0.0000001;
   private double kF = 0.00004;
@@ -102,6 +103,9 @@ public class Drivetrain extends SubsystemBase {
 
     leftEncoder = leftF.getEncoder();
     rightEncoder = rightF.getEncoder();
+
+    leftEncoder.setPosition(0);
+    rightEncoder.setPosition(0);
 
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
@@ -149,6 +153,7 @@ public class Drivetrain extends SubsystemBase {
     // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia (wikipedia as source lol),
     // Solid rectangular cuboid model:
     // 1/12 * m * (h^2 + w^2)
+    // TODO: find L & R resistance R = V/I (stall) = 12V/100A = 0.12?
     System.out.println(0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)));
     LinearSystem<N2, N2, N2> plant =
         buildPlant(Constants.RobotConstants.wheelRadMeters, 
@@ -157,10 +162,12 @@ public class Drivetrain extends SubsystemBase {
             RobotConstants.gearRatio, 
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
-            100, 
-            1, 
-            1);
+            96.028, 
+            0.12, 
+            0.12);
 
+    //
+    //18.173333
     controller = new LTVDifferentialDriveController(plant, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
     estimator =
@@ -223,16 +230,16 @@ public class Drivetrain extends SubsystemBase {
      * B = [ c1 * C2  c2 * C4 ]
      *     [ c2 * C2  c1 * C4 ]
      * 
-     * Kv for NEO is 917 under no load
-     * TODO: test under load
+     * Kv for NEO is 917 under no load, 917 in RPM * 2 * PI * / 60 = 96.028
      * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
      * https://www.revrobotics.com/content/docs/REV-21-1651-DS.pdf
      * 
      * determining Kt is simply an inversion of Kv and a unit conversion, or stall torque over stall current
-     * Kt = 60 / 2pi * Kv
+     * Kt = 60 / 2pi * Kv  Kt = T / I = 0.0108
+     * https://motors.vex.com/other-motors/neo550
      * https://electronics.stackexchange.com/questions/531406/how-to-calculate-the-torque-constant-for-a-bldc-motor
      */
-    double Kt = 60 / (2 * Math.PI * Kv);
+    double Kt = 0.97 / 100;//1.08 * 2 / 111;//60 / (2 * Math.PI * Kv);
     double C1 = -Math.pow(Gl, 2) * Kt / (Rl * Kv * Math.pow(r, 2));
     double C2 = Gl * Kt / (Rl * r);
     double C3 = -Math.pow(Gr, 2) * Kt / (Rr * Kv * Math.pow(r, 2));
@@ -286,7 +293,7 @@ public class Drivetrain extends SubsystemBase {
   // https://www.chiefdelphi.com/t/sparkmax-api-set-current-set-voltage-calls/385160/7
   public void setV(double lVolts, double rVolts) {
     leftControl.setReference(lVolts, ControlType.kVoltage);
-    rightControl.setReference(rVolts, ControlType.kVelocity);
+    rightControl.setReference(rVolts, ControlType.kVoltage);
     //leftF.setVoltage(lVolts);
     //leftR.setVoltage(lVolts);
     //rightF.setVoltage(rVolts);
@@ -302,6 +309,8 @@ public class Drivetrain extends SubsystemBase {
     //SmartDashboard.putNumber("Left target:", lVel);
     //SmartDashboard.putNumber("Right target:", rVel);
     // velocity (m/s) / circumference of wheel * 42 encoder units per rotation / 10 (u/100ms)
+
+    controller.calculate(position, lVel, rVel, null);
 
     double lEncoderSpeed = lVel / (RobotConstants.encoderToMeters);
     double rEncoderSpeed = rVel / (RobotConstants.encoderToMeters);
@@ -354,11 +363,12 @@ public class Drivetrain extends SubsystemBase {
 
     loop++;
     if (loop > 50) {
-      System.out.println("LeftF duty cycle, bus voltage: " + leftF.getAppliedOutput() + " " + leftF.getBusVoltage());
+      /*System.out.println("LeftF duty cycle, bus voltage: " + leftF.getAppliedOutput() + " " + leftF.getBusVoltage());
       System.out.println("LeftR duty cycle, bus voltage: " + leftR.getAppliedOutput() + " " + leftR.getBusVoltage());
       System.out.println("RightF duty cycle, bus voltage: " + rightF.getAppliedOutput() + " " + rightF.getBusVoltage());
       System.out.println("RightR duty cycle, bus voltage: " + rightR.getAppliedOutput() + " " + rightR.getBusVoltage());
-
+      */
+      //System.out.println(getEncoderV()[0] + " " + getEncoderV()[1]);
       //System.out.println(position);
       //System.out.println("imu yaw: " + getTransformedIMU());
       loop = 0;
@@ -375,21 +385,27 @@ public class Drivetrain extends SubsystemBase {
                 -leftEncoder.getPosition() * RobotConstants.encoderToMeters,
                 -rightEncoder.getPosition() * RobotConstants.encoderToMeters));
 
-    Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
+    /*Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
         //System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
         position = pose.get().estimatedPose.toPose2d();
         setIMU(position.getRotation().getDegrees());
-    }
+    }*/
   }
 
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
 
-    ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
-    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+    //ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
+    //DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
 
-    setVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
+    DifferentialDriveWheelVoltages v = controller.calculate(position, leftEncoder.getVelocity() / 42, rightEncoder.getVelocity() / 42, p);
+
+    System.out.println("Velocity target: " + p.velocityMetersPerSecond);
+    System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
+    System.out.println("Pos: " + position.getX() + " " + p.poseMeters.getX());
+    System.out.println("Volts: " + v.left + " " + v.right);
+    setV(v.left, v.right);
     return controller.atReference();
   }
 }

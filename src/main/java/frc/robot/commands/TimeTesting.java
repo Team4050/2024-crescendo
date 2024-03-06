@@ -1,7 +1,11 @@
 package frc.robot.commands;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.Drivetrain;
 
 public class TimeTesting extends Command {
@@ -10,7 +14,7 @@ public class TimeTesting extends Command {
     private double time;
     private double direction = 1;
     private boolean turning;
-    private static final double turningConstant = 0.01;
+    private static final double turningConstant = 0.00355;
 
     public TimeTesting(Drivetrain drivetrain, double value, boolean turning) {
         this.drivetrain = drivetrain;
@@ -19,10 +23,14 @@ public class TimeTesting extends Command {
             direction = -1;
         }
         time = Math.abs(value);
+        if (turning) {
+            time *= turningConstant;
+        }
     }
 
     @Override
     public void initialize() {
+        System.out.println("Begin sequence");
         timer = new Timer();
         timer.start();
         // TODO Auto-generated method stub
@@ -31,14 +39,19 @@ public class TimeTesting extends Command {
 
     @Override
     public void execute() {
+        if (timer.get() > time) {
+            drivetrain.set(0, 0);
+        }
+        else {
         if (turning) {
-            drivetrain.set(0.8 * direction, -0.8 * direction);
-            super.execute();
+            System.out.println(0.8 * direction);
+            drivetrain.set(0.5 * direction, -0.5 * direction);
             return;
         } 
-        drivetrain.set(0.8 * direction, 0.8 * direction);
+        drivetrain.set(0.5 * direction, 0.5 * direction);
+        }
+
         // TODO Auto-generated method stub
-        super.execute();
     }
 
     @Override
@@ -48,8 +61,16 @@ public class TimeTesting extends Command {
     }
 
     @Override
+    public Set<Subsystem> getRequirements() {
+        // TODO Auto-generated method stub
+        HashSet<Subsystem> reqs = new HashSet<Subsystem>();
+        reqs.add(drivetrain);
+        return reqs;
+    }
+
+    @Override
     public boolean isFinished() {
         // TODO Auto-generated method stub
-        return timer.get() > time;
+        return timer.get() > time + 3;
     }
 }

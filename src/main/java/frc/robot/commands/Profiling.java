@@ -1,7 +1,11 @@
 package frc.robot.commands;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
 
@@ -52,16 +56,18 @@ public class Profiling extends Command {
             clamp = 12;
         }
 
-        drivetrain.setVelocity(clamp, clamp);
+        clamp = 12;
+
+        drivetrain.setV(clamp, clamp);
         //drivetrain.set(clamp / 12, clamp / 12);
 
         double[] encoderSpeeds = drivetrain.getEncoderV();
 
-        xl[samplesl] = timer.get();
+        xl[samplesl] = voltage;
         yl[samplesl] = encoderSpeeds[0] / 42;
         samplesl++;
 
-        xr[samplesr] = timer.get();
+        xr[samplesr] = voltage;
         yr[samplesr] = encoderSpeeds[1] / 42;
         samplesr++;
 
@@ -112,8 +118,18 @@ public class Profiling extends Command {
         System.out.println("Right A, B: " + Ar + " " + Br);
         System.out.println("L, R X intercept: " + (Al / Bl) + " " + (Ar / Br));
 
+        drivetrain.set(0, 0);
+
         // TODO Auto-generated method stub
         super.end(interrupted);
+    }
+
+    @Override
+    public Set<Subsystem> getRequirements() {
+        // TODO Auto-generated method stub
+        HashSet<Subsystem> reqs = new HashSet<Subsystem>();
+        reqs.add(drivetrain);
+        return reqs;
     }
 
     @Override
