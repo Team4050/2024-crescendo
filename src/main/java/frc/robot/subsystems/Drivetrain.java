@@ -67,7 +67,7 @@ public class Drivetrain extends SubsystemBase {
   private boolean useVision = true;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
-  private boolean useIMU = false;
+  private boolean useIMU = true;
 
   private CANcoder leftExternalEncoder;
   private CANcoder rightExternalEncoder;
@@ -141,8 +141,8 @@ public class Drivetrain extends SubsystemBase {
       imu = null;
     }
     // X, Y, Rotation in radians, XVel, YVel
-    Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, Math.PI / 30, 0.2, 0.2);
-    Vector<N2> relems = VecBuilder.fill(0.6, 0.6);
+    Vector<N5> qelems = VecBuilder.fill(0.06, 0.06, Math.PI / 45, 0.11, 0.11);
+    Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
 
     //Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
     //Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
@@ -164,11 +164,9 @@ public class Drivetrain extends SubsystemBase {
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
             96.028, 
-            0.12, 
-            0.12);
+            0.2, 
+            0.2);
 
-    //
-    //18.173333
     controller = new LTVDifferentialDriveController(plant, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
     estimator =
@@ -344,16 +342,17 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getTransformedIMU() {
-    return new Rotation2d();
-    //return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
+    //return new Rotation2d();
+    return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
   }
 
   public void setIMU(double yaw) {
-    //imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw - Constants.Sensors.axisCorrectionDegrees);
+    imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
   }
 
   public void setPose(Pose2d manual) {
     position = manual;
+    estimator.resetPosition(getTransformedIMU(), leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, manual);
   }
 
   int loop = 0;
@@ -370,8 +369,8 @@ public class Drivetrain extends SubsystemBase {
       System.out.println("RightR duty cycle, bus voltage: " + rightR.getAppliedOutput() + " " + rightR.getBusVoltage());
       */
       //System.out.println(getEncoderV()[0] + " " + getEncoderV()[1]);
-      //System.out.println(position);
-      //System.out.println("imu yaw: " + getTransformedIMU());
+      System.out.println(position);
+      System.out.println("imu yaw: " + getTransformedIMU());
       loop = 0;
     }
 
@@ -383,8 +382,8 @@ public class Drivetrain extends SubsystemBase {
         estimator.update(
             getTransformedIMU(),
             new DifferentialDriveWheelPositions(
-                leftEncoder.getPosition() * RobotConstants.encoderToMeters,
-                rightEncoder.getPosition() * RobotConstants.encoderToMeters));
+                leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters,
+                rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters));
 
 
     //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
@@ -401,13 +400,13 @@ public class Drivetrain extends SubsystemBase {
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
 
-    //ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
-    //DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
-
     DifferentialDriveWheelVoltages v = controller.calculate(position, leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters, rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters, p);
 
-    System.out.println("Velocity target: " + p.velocityMetersPerSecond + " " + (leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters));
-    System.out.println("Volts: " + v.left + " " + -v.right);
+    //ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
+    //DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+    //System.out.println("Velocity target: " + p.velocityMetersPerSecond + " " + (leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters));
+    //System.out.println("Volts: " + v.left + " " + -v.right);
+    System.out.println("err: " + (p.velocityMetersPerSecond - (((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters) + (rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) / 2)));
     setV(v.left, v.right);
     return controller.atReference();
   }

@@ -31,14 +31,14 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    UsbCamera usbcam = CameraServer.startAutomaticCapture();
+    /*UsbCamera usbcam = CameraServer.startAutomaticCapture();
     VideoMode[] modes = usbcam.enumerateVideoModes();
     for (int i = 0; i < modes.length; i++) {
       System.out.println(modes[i].fps + " " + modes[i].height + " " + modes[i].width + " " + modes[i].pixelFormat.name());
       /*if (modes[i].fps == 60) {
 
-      }*/
-    }
+      }
+    }*/
     //System.out.println("Success in setting camera? " + usbcam.setVideoMode(modes[8]));
     //System.out.println("Real FPS:" + usbcam.getActualFPS());
     m_robotContainer = new RobotContainer();

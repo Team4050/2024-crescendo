@@ -39,12 +39,14 @@ public class TestAuto extends Command {
     // 3.93954
     //drive.set(0.9, 0.9);
     list.add(new Pose2d(0, 0, new Rotation2d()));
-    list.add(new Pose2d(2.0, 0, new Rotation2d()));
+    list.add(new Pose2d(1.0, 1.0, new Rotation2d(Math.toRadians(0))));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
             tconfig);
     end = timer.get() + 6.0;
+    drive.setIMU(0);
+    drive.setPose(new Pose2d(0, 0, new Rotation2d()));
     // 3 means 11 inches
   }
 
@@ -55,7 +57,7 @@ public class TestAuto extends Command {
     drive.follow(trajectory, timer.get());
     State s = trajectory.sample(timer.get());
     loop++;
-    if (loop > 500) {
+    if (loop > 200) {
       System.out.println(
           "Target: "
               + s.poseMeters.getX()
@@ -70,6 +72,7 @@ public class TestAuto extends Command {
               + drive.get().getY()
               + " "
               + drive.get().getRotation().getDegrees());
+      System.out.println("Time: " + timer.get());
     }
   }
 
