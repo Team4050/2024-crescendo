@@ -140,14 +140,15 @@ public class Drivetrain extends SubsystemBase {
     else {
       imu = null;
     }
-    Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, 0.2, 0.2, 0.2);
-    Vector<N2> relems = VecBuilder.fill(0.01, 0.01);
+    // X, Y, Rotation in radians, XVel, YVel
+    Vector<N5> qelems = VecBuilder.fill(0.2, 0.2, Math.PI / 30, 0.2, 0.2);
+    Vector<N2> relems = VecBuilder.fill(0.6, 0.6);
 
-    Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
-    Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
+    //Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
+    //Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
 
-    double maxV = A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
-    System.out.println(maxV);
+    //double maxV = A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
+    //System.out.println(maxV);
 
     // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1
     // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia (wikipedia as source lol),
@@ -382,8 +383,12 @@ public class Drivetrain extends SubsystemBase {
         estimator.update(
             getTransformedIMU(),
             new DifferentialDriveWheelPositions(
-                -leftEncoder.getPosition() * RobotConstants.encoderToMeters,
-                -rightEncoder.getPosition() * RobotConstants.encoderToMeters));
+                leftEncoder.getPosition() * RobotConstants.encoderToMeters,
+                rightEncoder.getPosition() * RobotConstants.encoderToMeters));
+
+
+    //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
+    //System.out.println("Pos: " + position.getX());
 
     /*Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
@@ -399,12 +404,10 @@ public class Drivetrain extends SubsystemBase {
     //ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
     //DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
 
-    DifferentialDriveWheelVoltages v = controller.calculate(position, leftEncoder.getVelocity() / 42, rightEncoder.getVelocity() / 42, p);
+    DifferentialDriveWheelVoltages v = controller.calculate(position, leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters, rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters, p);
 
-    System.out.println("Velocity target: " + p.velocityMetersPerSecond);
-    System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
-    System.out.println("Pos: " + position.getX() + " " + p.poseMeters.getX());
-    System.out.println("Volts: " + v.left + " " + v.right);
+    System.out.println("Velocity target: " + p.velocityMetersPerSecond + " " + (leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters));
+    System.out.println("Volts: " + v.left + " " + -v.right);
     setV(v.left, v.right);
     return controller.atReference();
   }

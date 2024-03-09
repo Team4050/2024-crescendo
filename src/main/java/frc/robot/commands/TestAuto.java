@@ -31,7 +31,7 @@ public class TestAuto extends Command {
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(5));
+        new TrajectoryConfig(Units.MetersPerSecond.of(1), Units.MetersPerSecondPerSecond.of(0.4));
     super.initialize();
     timer = new Timer();
     timer.start();
@@ -39,12 +39,12 @@ public class TestAuto extends Command {
     // 3.93954
     //drive.set(0.9, 0.9);
     list.add(new Pose2d(0, 0, new Rotation2d()));
-    list.add(new Pose2d(4.0, 0, new Rotation2d()));
+    list.add(new Pose2d(2.0, 0, new Rotation2d()));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
             tconfig);
-    end = timer.get() + 3.0;
+    end = timer.get() + 6.0;
     // 3 means 11 inches
   }
 
