@@ -22,7 +22,6 @@ public final class Constants {
     public static final int kSecondaryControllerPort = 1;
     public static final int kDriverFStickControllerPort = 0;
   }
-  ;
 
   public static class MotorCANValues {
     // All motors are Rev NEO except for conveyor which is Talon SRX
@@ -39,7 +38,6 @@ public final class Constants {
     public static final int intake = 6;
     public static final int conveyor = 7;
   }
-  ;
 
   public static class MotorDriveValues {
     public static final double shooterSpeed = -1.0;
@@ -47,10 +45,16 @@ public final class Constants {
     public static final double intakeSpeed = 0.2;
     public static final double conveyorSpeed = -0.7;
   }
-  ;
 
   public static class Sensors {
     public static final String LimelightName = "Limelight";
     public static final Transform3d RobotToCamera = new Transform3d();
+  }
+
+  public static class Cameras {
+    public static final int[] resolution = {800, 600};
+    public static final int fps = 15;
+    public static final String fisheyeName = "Intake Camera";
+    public static final int fisheyeId = 0;
   }
 }

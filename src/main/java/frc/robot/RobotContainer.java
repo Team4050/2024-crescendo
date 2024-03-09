@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -12,7 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.TestAuto;
@@ -70,6 +71,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    initCameras();
+
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
@@ -84,8 +87,6 @@ public class RobotContainer {
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
-
-    configureBindings();
 
     drivetrainDefault =
         new RunCommand(
@@ -204,17 +205,6 @@ public class RobotContainer {
             shooter));
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
-  private void configureBindings() {}
-
   public void chooseControls() {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
     adjustedShooterSpeed = SmartDashboard.getNumber("shooter", 0);
@@ -263,5 +253,13 @@ public class RobotContainer {
     // autoChooser.close();
     // c = new TestAuto(drivetrain);
     return c;
+  }
+
+  public void initCameras() {
+    UsbCamera intakeCamera =
+        CameraServer.startAutomaticCapture(
+            Constants.Cameras.fisheyeName, Constants.Cameras.fisheyeId);
+    intakeCamera.setResolution(Constants.Cameras.resolution[0], Constants.Cameras.resolution[1]);
+    intakeCamera.setFPS(Constants.Cameras.fps);
   }
 }
