@@ -9,6 +9,7 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -259,7 +260,10 @@ public class RobotContainer {
     UsbCamera intakeCamera =
         CameraServer.startAutomaticCapture(
             Constants.Cameras.fisheyeName, Constants.Cameras.fisheyeId);
-    intakeCamera.setResolution(Constants.Cameras.resolution[0], Constants.Cameras.resolution[1]);
-    intakeCamera.setFPS(Constants.Cameras.fps);
+    intakeCamera.setVideoMode(
+        PixelFormat.kMJPEG,
+        Constants.Cameras.resolution[0],
+        Constants.Cameras.resolution[1],
+        Constants.Cameras.fps);
   }
 }

@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.util.PixelFormat;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -54,6 +55,7 @@ public final class Constants {
   public static class Cameras {
     public static final int[] resolution = {800, 600};
     public static final int fps = 15;
+    public static final PixelFormat format = PixelFormat.kMJPEG;
     public static final String fisheyeName = "Intake Camera";
     public static final int fisheyeId = 0;
   }
