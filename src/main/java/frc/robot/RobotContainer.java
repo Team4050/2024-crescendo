@@ -4,12 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -72,8 +69,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    initCameras();
-
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
@@ -254,16 +249,5 @@ public class RobotContainer {
     // autoChooser.close();
     // c = new TestAuto(drivetrain);
     return c;
-  }
-
-  public void initCameras() {
-    UsbCamera intakeCamera =
-        CameraServer.startAutomaticCapture(
-            Constants.Cameras.fisheyeName, Constants.Cameras.fisheyeId);
-    intakeCamera.setVideoMode(
-        PixelFormat.kMJPEG,
-        Constants.Cameras.resolution[0],
-        Constants.Cameras.resolution[1],
-        Constants.Cameras.fps);
   }
 }
