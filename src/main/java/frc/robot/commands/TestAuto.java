@@ -39,7 +39,12 @@ public class TestAuto extends Command {
     // 3.93954
     //drive.set(0.9, 0.9);
     list.add(new Pose2d(0, 0, new Rotation2d()));
-    list.add(new Pose2d(1.0, 1.0, new Rotation2d(Math.toRadians(0))));
+    list.add(new Pose2d(1.0, 0.5, new Rotation2d(Math.toRadians(0))));
+    list.add(new Pose2d(1.5, 0.0, new Rotation2d(Math.toRadians(-90))));
+    list.add(new Pose2d(2.0, -0.5, new Rotation2d()));
+    list.add(new Pose2d(2.5, 0.0, new Rotation2d(90)));
+    list.add(new Pose2d(3.0, 0.5, new Rotation2d()));
+    list.add(new Pose2d(4.5, 0.0, new Rotation2d()));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
