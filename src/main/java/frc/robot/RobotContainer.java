@@ -47,6 +47,7 @@ public class RobotContainer {
   private final RunCommand drivetrainRamp;
   private final RunCommand drivetrainRampDefensive;
   private final RunCommand drivetrainFStickDefault;
+  private final RunCommand drivetrainScaledCurve;
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
   private boolean reverse = false;
@@ -133,6 +134,20 @@ public class RobotContainer {
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
             drivetrain);
+    drivetrainScaledCurve = 
+        new RunCommand(
+          () -> {
+              double f = -m_driverController.getLeftY();
+              double t = (Math.tan(m_driverController.getRightX(0.04f) * 1.25)) * (1 - Math.pow(f * 0.707, 2)) / 3;
+              /*if (Math.abs(m_driverController.getRightX(0.04f)) > 0.8 && f < 0.2) {
+                t = m_driverController.getRightX(0.04f);
+              }*/
+              System.out.println(t);
+              if (reverse) {
+                f = -f;
+              }
+              drivetrain.set((f + t), (f - t));
+        }, drivetrain);
     drivetrainTank =
         new RunCommand(
             () -> {
@@ -167,6 +182,7 @@ public class RobotContainer {
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
     driveControlChooser.addOption(
         "Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
+    driveControlChooser.addOption("Drivetrain arcade with turn ramping scaled by forward speed", drivetrainArcade1Stick);
     driveControlChooser.addOption(
         "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
