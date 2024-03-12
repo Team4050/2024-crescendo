@@ -22,7 +22,7 @@ public class TimeTesting extends Command {
         if (value < 0) {
             direction = -1;
         }
-        time = Math.abs(value);
+        time = getTime(Math.abs(value));
         if (turning) {
             time *= turningConstant;
         }
@@ -72,5 +72,12 @@ public class TimeTesting extends Command {
     public boolean isFinished() {
         // TODO Auto-generated method stub
         return timer.get() > time + 3;
+    }
+
+    // Model drivetrain movement linearly
+    private double m = 1.0;
+    private double b = 0.0;
+    private double getTime(double distance) {
+        return (m * distance) + b; 
     }
 }

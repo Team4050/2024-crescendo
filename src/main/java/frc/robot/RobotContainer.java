@@ -175,8 +175,8 @@ public class RobotContainer {
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
     driveControlChooser.addOption("Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
-    driveControlChooser.addOption(
-        "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
+    //driveControlChooser.addOption(
+    //    "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
     driveControlChooser.addOption("Tank control scheme", drivetrainTank);
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
