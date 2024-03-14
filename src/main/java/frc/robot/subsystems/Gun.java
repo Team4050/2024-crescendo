@@ -23,17 +23,19 @@ public class Gun extends SubsystemBase {
   public Gun() {
     shooterL = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);
     shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
+    shooterL.setInverted(false);
+    shooterR.setInverted(true);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
-    Constraints pidConstraints = new Constraints(1, 1);
-    controllerL = new ProfiledPIDController(1, 0, 0, pidConstraints);
-    controllerR = new ProfiledPIDController(1, 0, 0, pidConstraints);
+    Constraints pidConstraints = new Constraints(0.2, 10);
+    controllerL = new ProfiledPIDController(1, 0, 0.5, pidConstraints);
+    controllerR = new ProfiledPIDController(1, 0, 0.5, pidConstraints);
   }
 
   @Override
   public void periodic() {
-    shooterL.set(controllerL.calculate(encoderL.getVelocity()));
-    shooterR.set(controllerR.calculate(encoderR.getVelocity()));
+    shooterL.set(controllerL.calculate(encoderL.getVelocity() / 42));
+    shooterR.set(controllerR.calculate(encoderR.getVelocity() / 42));
     super.periodic();
   }
 

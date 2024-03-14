@@ -33,6 +33,9 @@ public final class Constants {
     public static final double robotHeight = 30 * 2.54 / 100;
     public static final double robotDepth = 30 * 2.54 / 100;
     public static final double robotTrackWidth = 0.42545;
+
+    // TODO: find circumference of shooter wheels
+    public static final double shooterEncoderToVelociy = 1 / 42;
   }
 
 
@@ -56,6 +59,8 @@ public final class Constants {
   public static class MotorDriveValues {
     public static final double shooterSpeed = -1.0;
     public static final double shooterSpeed2 = -0.75;
+    public static final double speakerTargetVelocityRPM = 0;
+    public static final double ampTargetVelocityRPM = 0;
     public static final double intakeSpeed = 0.2;
     public static final double conveyorSpeed = -0.7;
   }
