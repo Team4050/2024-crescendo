@@ -26,7 +26,7 @@ public class NoteStateMachine extends Command {
   public void execute() {
     intake.setConveyor(-1);
     if (intake.get()) {
-      gun.fire(1);
+      gun.fire(1, 0);
     } else {
       intake.setIntake(true, false);
     }
@@ -37,7 +37,7 @@ public class NoteStateMachine extends Command {
   public void end(boolean interrupted) {
     intake.setIntake(false, false);
     intake.setConveyor(0);
-    gun.fire(0);
+    gun.fire(0, 0);
     super.end(interrupted);
   }
 

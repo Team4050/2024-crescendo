@@ -140,7 +140,7 @@ public class Drivetrain extends SubsystemBase {
       imu = null;
     }
     // X, Y, Rotation in radians, XVel, YVel
-    Vector<N5> qelems = VecBuilder.fill(0.06, 0.06, Math.PI / 45, 0.11, 0.11);
+    Vector<N5> qelems = VecBuilder.fill(0.05, 0.05, Math.PI / 45, 0.11, 0.11);
     Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
 
     //Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
