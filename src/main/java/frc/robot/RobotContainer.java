@@ -207,11 +207,11 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (x.getAsBoolean()) {
-                shooter.fire(Constants.MotorDriveValues.shooterSpeed);
+                shooter.fire(Constants.MotorDriveValues.shooterSpeed , 0);
               } else if (y.getAsBoolean()) {
-                shooter.fire(-adjustedShooterSpeed);
+                shooter.fire(-adjustedShooterSpeed , 0);
               } else {
-                shooter.fire(0);
+                shooter.fire(0 , 0);
               }
             },
             shooter));

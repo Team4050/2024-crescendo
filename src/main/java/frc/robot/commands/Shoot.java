@@ -37,7 +37,7 @@ public class Shoot extends Command {
     @Override
     public void execute() {
         intake.setConveyor(1);
-        shooter.fire(1);
+        shooter.fire(1, 0);
         super.execute();
     }
 
@@ -51,7 +51,7 @@ public class Shoot extends Command {
     public void end(boolean interrupted) {
         // TODO Auto-generated method stub
         intake.setConveyor(0);
-        shooter.fire(0);
+        shooter.fire(0, 0);
         super.end(interrupted);
     }
 }

@@ -33,7 +33,8 @@ public final class Constants {
     public static final int leftClimber = 1;
     public static final int rightClimber = 1;
 
-    public static final int shooterWheel = 5;
+    public static final int shooterWheelL = 5;
+    public static final int shooterWheelR = 8;
 
     public static final int intake = 6;
     public static final int conveyor = 7;

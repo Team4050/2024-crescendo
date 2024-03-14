@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 
@@ -12,23 +13,27 @@ import frc.robot.Constants.MotorCANValues;
 
 public class Gun extends SubsystemBase {
   /* */
-  private CANSparkMax shooter;
-  private SparkPIDController controller;
-  private ProfiledPIDController controller2;
+  private CANSparkMax shooterL;
+  private CANSparkMax shooterR;
+  private ProfiledPIDController controllerL;
+  private ProfiledPIDController controllerR;
+  private RelativeEncoder encoderL;
+  private RelativeEncoder encoderR;
 
   public Gun() {
-    shooter = new CANSparkMax(MotorCANValues.shooterWheel, MotorType.kBrushless);
-    controller = shooter.getPIDController();
-    controller.setP(1);
-    controller.setI(0);
-    controller.setD(0);
-    controller.setFF(0);
-    controller2 = new ProfiledPIDController(1, 0, 0, new Constraints(1, 1));
+    shooterL = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);
+    shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
+    encoderL = shooterL.getEncoder();
+    encoderR = shooterR.getEncoder();
+    Constraints pidConstraints = new Constraints(1, 1);
+    controllerL = new ProfiledPIDController(1, 0, 0, pidConstraints);
+    controllerR = new ProfiledPIDController(1, 0, 0, pidConstraints);
   }
 
   @Override
   public void periodic() {
-    controller2.calculate(shooter.get());
+    shooterL.set(controllerL.calculate(encoderL.getVelocity()));
+    shooterR.set(controllerR.calculate(encoderR.getVelocity()));
     super.periodic();
   }
 
@@ -37,7 +42,8 @@ public class Gun extends SubsystemBase {
    *
    * @param speed Output percentage -1.0 - 1.0
    */
-  public void fire(double speed) {
-    controller2.setGoal(speed);
+  public void fire(double speed, double spin) {
+    controllerL.setGoal(speed + spin);
+    controllerR.setGoal(speed - spin);
   }
 }
