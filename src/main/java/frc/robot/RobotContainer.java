@@ -7,8 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -56,7 +54,7 @@ public class RobotContainer {
   private final RunCommand drivetrainDefault;
   private final RunCommand drivetrainRamp;
   private final RunCommand drivetrainRampDefensive;
-  private final RunCommand drivetrainFStickDefault;
+  private final RunCommand drivetrainScaledCurve;
   private final RunCommand drivetrainTank;
   private final RunCommand drivetrainArcade1Stick;
   private boolean reverse = false;
@@ -87,7 +85,7 @@ public class RobotContainer {
     intake = new Intake();
     shooter = new Gun();
 
-    //SmartDashboard.putData("Shooter speed", 1);
+    // SmartDashboard.putData("Shooter speed", 1);
     SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeed);
 
     autoChooser = new SendableChooser<Command>();
@@ -102,8 +100,6 @@ public class RobotContainer {
             new TimeTesting(drivetrain, -1.0, false)));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
-
-    configureBindings();
 
     drivetrainDefault =
         new RunCommand(
@@ -127,13 +123,13 @@ public class RobotContainer {
               drivetrain.set((f + t), (f - t));
             },
             drivetrain);
-    drivetrainRampDefensive = 
+    drivetrainRampDefensive =
         new RunCommand(
-          () -> {
+            () -> {
               double f = -m_driverController.getLeftY();
               double t = 0;
               if (mb.getAsBoolean()) {
-                 t = m_driverController.getRightX(); 
+                t = m_driverController.getRightX();
               } else {
                 t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
               }
@@ -141,8 +137,8 @@ public class RobotContainer {
                 f = -f;
               }
               drivetrain.set((f + t), (f - t));
-        }, drivetrain);
-        drivetrainFStickDefault = null;
+            },
+            drivetrain);
     /*drivetrainFStickDefault =
         new RunCommand(
             () -> {
@@ -154,12 +150,32 @@ public class RobotContainer {
               drivetrain.set((f + t) / 1.5, (f - t) / 1.5);
             },
             drivetrain);*/
+    drivetrainScaledCurve = 
+        new RunCommand(
+          () -> {
+              double f = -m_driverController.getLeftY();
+              double t = (Math.tan(m_driverController.getRightX(0.04f) * 1.25)) * (1 - Math.pow(f * 0.707, 2)) / 3;
+              /*if (Math.abs(m_driverController.getRightX(0.04f)) > 0.8 && f < 0.2) {
+                t = m_driverController.getRightX(0.04f);
+              }*/
+              System.out.println(t);
+              if (reverse) {
+                f = -f;
+              }
+              drivetrain.set((f + t), (f - t));
+        }, drivetrain);
     drivetrainTank =
         new RunCommand(
             () -> {
-              drivetrain.set(
-                  Math.log(-m_driverController.getLeftY() + Math.E) - 1,
-                  -(Math.log(-m_driverController.getRightY() + Math.E) - 1));
+              if (reverse) {
+                drivetrain.set(
+                    Math.log(-m_driverController.getLeftY() + Math.E) - 1,
+                    Math.log(m_driverController.getRightY() + Math.E) - 1);
+              } else {
+                drivetrain.set(
+                    Math.log(m_driverController.getLeftY() + Math.E) - 1,
+                    Math.log(-m_driverController.getRightY() + Math.E) - 1);
+              }
             },
             drivetrain);
     drivetrainArcade1Stick =
@@ -174,9 +190,11 @@ public class RobotContainer {
     driveControlChooser = new SendableChooser<RunCommand>();
     driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
-    driveControlChooser.addOption("Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
-    //driveControlChooser.addOption(
-    //    "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
+    driveControlChooser.addOption(
+        "Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
+    driveControlChooser.addOption("Drivetrain arcade with turn ramping scaled by forward speed", drivetrainArcade1Stick);
+    driveControlChooser.addOption(
+        "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
     driveControlChooser.addOption("Tank control scheme", drivetrainTank);
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
@@ -185,11 +203,9 @@ public class RobotContainer {
     intake.setDefaultCommand(
         new RunCommand(
             () -> {
-              intake.setIntake(
-                  rightTrigger.getAsBoolean(),
-                  b.getAsBoolean());
+              intake.setIntake(rightTrigger.getAsBoolean(), b.getAsBoolean());
 
-              //Robot error on X press with conveyor enabled
+              // Robot error on X press with conveyor enabled
               if (x.getAsBoolean() || y.getAsBoolean()) {
                 intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
@@ -199,27 +215,17 @@ public class RobotContainer {
             intake));
     shooter.setDefaultCommand(
         new RunCommand(
-      () -> {
-        if (x.getAsBoolean()) {
-          shooter.fire(Constants.MotorDriveValues.shooterSpeed);
-        } else if (y.getAsBoolean()) {
-          shooter.fire(-adjustedShooterSpeed);
-        } else {
-          shooter.fire(0);
-        }
-      }, shooter));
+            () -> {
+              if (x.getAsBoolean()) {
+                shooter.fire(Constants.MotorDriveValues.shooterSpeed , 0);
+              } else if (y.getAsBoolean()) {
+                shooter.fire(-adjustedShooterSpeed , 0);
+              } else {
+                shooter.fire(0 , 0);
+              }
+            },
+            shooter));
   }
-
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
-  private void configureBindings() {}
 
   public void chooseControls() {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
@@ -259,7 +265,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     Command c = autoChooser.getSelected();
-    //TODO: Use this code if fetching from chooser fails
+    // TODO: Use this code if fetching from chooser fails
     /*switch (c) {
       case "defaultAuto":
         return new TestAuto(drivetrain);
@@ -271,9 +277,9 @@ public class RobotContainer {
         return new RunCommand(() -> {}, drivetrain);
         break;
     }*/
-    //TODO: close resource since we're not using it twice in one run?
-    //autoChooser.close();
-    //c = new TestAuto(drivetrain);
+    // TODO: close resource since we're not using it twice in one run?
+    // autoChooser.close();
+    // c = new TestAuto(drivetrain);
     return c;
   }
 }

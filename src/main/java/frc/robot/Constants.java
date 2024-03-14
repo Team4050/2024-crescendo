@@ -17,12 +17,13 @@ import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final boolean logging = false;
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kSecondaryControllerPort = 1;
     public static final int kDriverFStickControllerPort = 0;
   }
-  ;
 
   public static class RobotConstants {
     public static final double wheelRadMeters = 0.0762;
@@ -46,7 +47,8 @@ public final class Constants {
     public static final int leftClimber = 1;
     public static final int rightClimber = 1;
 
-    public static final int shooterWheel = 5;
+    public static final int shooterWheelL = 5;
+    public static final int shooterWheelR = 8;
 
     public static final int intake = 6;
     public static final int conveyor = 7;
@@ -54,7 +56,6 @@ public final class Constants {
     public static final int cancoderLeft = 10;
     public static final int cancoderRight = 11;
   }
-  ;
 
   public static class MotorDriveValues {
     public static final double shooterSpeed = -1.0;
@@ -62,7 +63,6 @@ public final class Constants {
     public static final double intakeSpeed = 0.2;
     public static final double conveyorSpeed = -0.7;
   }
-  ;
 
   public static class Sensors {
     public static final String LimelightName = "Limelight";

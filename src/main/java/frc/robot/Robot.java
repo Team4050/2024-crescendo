@@ -29,18 +29,44 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
-    /*UsbCamera usbcam = CameraServer.startAutomaticCapture();
-    VideoMode[] modes = usbcam.enumerateVideoModes();
-    for (int i = 0; i < modes.length; i++) {
-      System.out.println(modes[i].fps + " " + modes[i].height + " " + modes[i].width + " " + modes[i].pixelFormat.name());
-      /*if (modes[i].fps == 60) {
-
-      }
-    }*/
-    //System.out.println("Success in setting camera? " + usbcam.setVideoMode(modes[8]));
-    //System.out.println("Real FPS:" + usbcam.getActualFPS());
+    System.out.print(
+        "                                                          __   __                         \n"
+            + "                                                     _wr''       ''-q__                   \n"
+            + "                                                  _dP                 9m_                 \n"
+            + "                                                _#P                     9#_               \n"
+            + "                                               d#@                       9#m              \n"
+            + "                                              d##                         ###             \n"
+            + "                                             J###                         ###L            \n"
+            + "                                             {###K                       J###K            \n"
+            + "                                             ]####K      ___aaa___      J####F            \n"
+            + "                                         __gmM######_  w#P''   ''9#m  _d#####Mmw__        \n"
+            + "                                      _g##############mZ_         __g##############m_     \n"
+            + "                                    _d####M@PPPP@@M#######Mmp gm#########@@PPP9@M####m_   \n"
+            + "                                   a###'           ,Z'#####@   ######'jg          ''M##m  \n"
+            + "                                  J#@'             0L  '*##     ##@'  J#              *#K \n"
+            + "                                  #'               `#    '_gmwgm_~    dF               `#_\n"
+            + "                                 7F                 '#_   ]#####F   _dK                 JE\n"
+            + "                                 ]                    *m__ ##### __g@'                   F\n"
+            + "                                                        'PJ#####LP'                       \n"
+            + "                                  `                       0######_                      ' \n"
+            + "                                                        _0########_                       \n"
+            + "                                      .               _d#####^#####m__              ,     \n"
+            + "                                       '*w_________am#####P'   ~9#####mw_________w*'      \n"
+            + "                                           ''9@#####@M''           ''P@#####@M''          \n"
+            + "\n"
+            + "\n"
+            + "\n"
+            + "\n"
+            + "\n"
+            + "    ███        ▄████████  ▄██████▄  ███    █▄  ▀█████████▄   ▄█          ▄████████  ▄████████  ▄█          ▄████████    ▄█████ \n"
+            + "▀█████████▄   ███    ███ ███    ███ ███    ███   ███    ███ ███         ███    ███ ███    ███ ███         ███    ███   ███     \n"
+            + "   ▀███▀▀██   ███    ███ ███    ███ ███    ███   ███    ███ ███         ███    █▀  ███    █▀  ███         ███    █▀    ███     \n"
+            + "    ███   ▀  ▄███▄▄▄▄██▀ ███    ███ ███    ███  ▄███▄▄▄██▀  ███        ▄███▄▄▄     ███        ███        ▄███▄▄▄      ▄███▄▄▄  \n"
+            + "    ███     ▀▀███▀▀▀▀▀   ███    ███ ███    ███ ▀▀███▀▀▀██▄  ███       ▀▀███▀▀▀     ███        ███       ▀▀███▀▀▀     ▀▀███▀▀▀  \n"
+            + "    ███     ▀███████████ ███    ███ ███    ███   ███    ██▄ ███         ███    █▄  ███    █▄  ███         ███    █▄    ███     \n"
+            + "    ███       ███    ███ ███    ███ ███    ███   ███    ███ ███▌    ▄   ███    ███ ███    ███ ███▌    ▄   ███    ███   ███     \n"
+            + "   ▄████▀     ███    ███  ▀██████▀  ████████▀  ▄█████████▀  █████▄▄██   ██████████ ████████▀  █████▄▄██   ██████████   ███     \n"
+            + "              ███    ███                                    ▀                                 ▀                                \n");
     m_robotContainer = new RobotContainer();
   }
 
