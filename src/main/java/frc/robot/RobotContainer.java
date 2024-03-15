@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlignShooter;
+import frc.robot.commands.PathweaverTest;
 import frc.robot.commands.TestAuto;
 import frc.robot.commands.TimeTesting;
 import frc.robot.commands.Profiling;
@@ -89,7 +90,8 @@ public class RobotContainer {
     SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeed);
 
     autoChooser = new SendableChooser<Command>();
-    autoChooser.setDefaultOption("Default auto: test", new TestAuto(drivetrain));
+    autoChooser.setDefaultOption("Default auto: test", new PathweaverTest(drivetrain));
+    autoChooser.addOption("Test auto 2", new TestAuto(drivetrain));
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
     autoChooser.addOption("motor profiling", new Profiling(drivetrain, m_driverController));
     autoChooser.addOption("Time sequence", 

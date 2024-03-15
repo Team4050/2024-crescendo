@@ -21,6 +21,7 @@ public class Gun extends SubsystemBase {
   private ProfiledPIDController controllerR;
   private RelativeEncoder encoderL;
   private RelativeEncoder encoderR;
+  private double out = 0;
 
   public Gun() {
     shooterL = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);

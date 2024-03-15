@@ -46,8 +46,8 @@ public class TestAuto extends Command {
     list.add(new Pose2d(3.0, 0.5, new Rotation2d()));
     list.add(new Pose2d(4.5, 0.0, new Rotation2d()));*/
     list.add(new Pose2d());
-    list.add(new Pose2d(0.5, 0.5, new Rotation2d(Math.toRadians(90))));
-    list.add(new Pose2d(0, 1.0, new Rotation2d(Math.toRadians(180))));
+    list.add(new Pose2d(0, 0, new Rotation2d(Math.toRadians(0))));
+    list.add(new Pose2d(6.0, 0, new Rotation2d(Math.toRadians(0))));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
