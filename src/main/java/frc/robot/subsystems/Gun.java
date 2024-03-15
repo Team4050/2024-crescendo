@@ -5,6 +5,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -20,6 +21,7 @@ public class Gun extends SubsystemBase {
   private RelativeEncoder encoderL;
   private RelativeEncoder encoderR;
 
+  // TODO: switch l and r
   public Gun() {
     shooterL = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);
     shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
@@ -27,6 +29,11 @@ public class Gun extends SubsystemBase {
     shooterR.setInverted(true);
     shooterL.setSmartCurrentLimit(60);
     shooterR.setSmartCurrentLimit(60);
+    shooterL.setIdleMode(IdleMode.kCoast);
+    shooterR.setIdleMode(IdleMode.kCoast);
+    shooterL.clearFaults();
+    shooterR.clearFaults();
+    shooterR.follow(shooterL, true);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
     Constraints pidConstraints = new Constraints(100, 10);
@@ -49,8 +56,9 @@ public class Gun extends SubsystemBase {
    * @param speed Output percentage -1.0 - 1.0
    */
   public void fire(double speed, double spin) {
-    shooterL.set(speed);
-    shooterR.set(speed);
+    shooterL.setVoltage(speed * 12);
+    shooterR.setVoltage(speed * 12);
+    System.out.println("out: " + shooterR.getAppliedOutput());
     //controllerL.setGoal(speed + spin);
     //controllerR.setGoal(speed - spin);
   }
