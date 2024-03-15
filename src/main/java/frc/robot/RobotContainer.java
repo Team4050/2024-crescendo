@@ -100,7 +100,7 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               double f = -m_driverController.getLeftY();
-              double t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
+              double t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.3;
               if (reverse) {
                 f = -f;
               }
@@ -115,7 +115,7 @@ public class RobotContainer {
               if (mb.getAsBoolean()) {
                 t = m_driverController.getRightX();
               } else {
-                t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.7;
+                t = (Math.log(m_driverController.getRightX(0.04f) + Math.E) - 1) / 1.3;
               }
               if (reverse) {
                 f = -f;
@@ -139,6 +139,7 @@ public class RobotContainer {
           () -> {
               double f = -m_driverController.getLeftY();
               double t = (Math.tan(m_driverController.getRightX(0.04f) * 1.25)) * (1 - Math.pow(f * 0.707, 2)) / 3;
+              System.out.println(t);
               /*if (Math.abs(m_driverController.getRightX(0.04f)) > 0.8 && f < 0.2) {
                 t = m_driverController.getRightX(0.04f);
               }*/
@@ -182,7 +183,7 @@ public class RobotContainer {
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
     driveControlChooser.addOption(
         "Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
-    driveControlChooser.addOption("Drivetrain arcade with turn ramping scaled by forward speed", drivetrainArcade1Stick);
+    driveControlChooser.addOption("Drivetrain arcade with turn ramping scaled by forward speed", drivetrainScaledCurve);
     driveControlChooser.addOption(
         "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
     driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
@@ -196,7 +197,7 @@ public class RobotContainer {
               intake.setIntake(rightTrigger.getAsBoolean(), b.getAsBoolean());
 
               // Robot error on X press with conveyor enabled
-              if (x.getAsBoolean() || y.getAsBoolean()) {
+              if (x.getAsBoolean()) {
                 intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
                 intake.setConveyor(0);
@@ -207,9 +208,9 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (x.getAsBoolean()) {
-                shooter.fire(Constants.MotorDriveValues.shooterSpeed , 0);
+                //shooter.fire(Constants.MotorDriveValues.shooterSpeed , 0);
               } else if (y.getAsBoolean()) {
-                shooter.fire(-adjustedShooterSpeed , 0);
+                shooter.fire(adjustedShooterSpeed , 0);
               } else {
                 shooter.fire(0 , 0);
               }

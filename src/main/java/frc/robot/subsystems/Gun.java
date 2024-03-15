@@ -25,18 +25,22 @@ public class Gun extends SubsystemBase {
     shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
     shooterL.setInverted(false);
     shooterR.setInverted(true);
+    shooterL.setSmartCurrentLimit(60);
+    shooterR.setSmartCurrentLimit(60);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
-    Constraints pidConstraints = new Constraints(0.2, 10);
-    controllerL = new ProfiledPIDController(1, 0, 0.5, pidConstraints);
-    controllerR = new ProfiledPIDController(1, 0, 0.5, pidConstraints);
+    Constraints pidConstraints = new Constraints(100, 10);
+    controllerL = new ProfiledPIDController(0.008, 0, 0, pidConstraints);
+    controllerR = new ProfiledPIDController(0.008, 0, 0, pidConstraints);
   }
 
   @Override
   public void periodic() {
-    shooterL.set(controllerL.calculate(encoderL.getVelocity() / 42));
-    shooterR.set(controllerR.calculate(encoderR.getVelocity() / 42));
-    super.periodic();
+    /*double lpower = controllerL.calculate(encoderL.getVelocity() / 42);
+    shooterL.set(-lpower);
+    System.out.println("L power: " + lpower);
+    shooterR.set(-controllerR.calculate(encoderR.getVelocity() / 42));
+    super.periodic();*/
   }
 
   /**
@@ -45,7 +49,9 @@ public class Gun extends SubsystemBase {
    * @param speed Output percentage -1.0 - 1.0
    */
   public void fire(double speed, double spin) {
-    controllerL.setGoal(speed + spin);
-    controllerR.setGoal(speed - spin);
+    shooterL.set(speed);
+    shooterR.set(speed);
+    //controllerL.setGoal(speed + spin);
+    //controllerR.setGoal(speed - spin);
   }
 }
