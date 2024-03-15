@@ -71,6 +71,11 @@ public class Drivetrain extends SubsystemBase {
   private CANcoder leftExternalEncoder;
   private CANcoder rightExternalEncoder;
 
+  private double LEMA = 0;
+  private double REMA = 0;
+
+  private double alpha = 0.06;
+
   /* Constants */
   public DifferentialDriveKinematics kinematics;
   //Robot weight is 95.7lbs
@@ -123,7 +128,7 @@ public class Drivetrain extends SubsystemBase {
     rightControl.setD(kD);
     rightControl.setFF(kF);
 
-    kinematics = new DifferentialDriveKinematics(0.42545);
+    kinematics = new DifferentialDriveKinematics(RobotConstants.robotTrackWidth);
     position = initial;
     if (useVision) {
       vision = new HazardVision();
@@ -140,8 +145,8 @@ public class Drivetrain extends SubsystemBase {
       imu = null;
     }
     // X, Y, Rotation in radians, XVel, YVel
-    Vector<N5> qelems = VecBuilder.fill(0.05, 0.05, Math.PI / 45, 0.11, 0.11);
-    Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
+    Vector<N5> qelems = VecBuilder.fill(0.1, 0.1, Math.PI / 45, 0.15, 0.15);
+    Vector<N2> relems = VecBuilder.fill(0.4, 0.4);
 
     //Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
     //Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
@@ -163,8 +168,8 @@ public class Drivetrain extends SubsystemBase {
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
             96.028, 
-            0.2, 
-            0.2);
+            0.125, 
+            0.125);
 
     controller = new LTVDifferentialDriveController(plant, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
@@ -271,7 +276,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double[] getEncoderV() {
-    return new double[] {leftEncoder.getVelocity(), rightEncoder.getVelocity()};
+    return new double[] {LEMA, REMA};
   }
 
   /**
@@ -360,6 +365,9 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     super.periodic();
 
+    LEMA = LEMA + alpha * (leftEncoder.getVelocity() - LEMA);
+    REMA = REMA + alpha * (rightEncoder.getVelocity() - REMA);
+
     loop++;
     if (loop > 50) {
       /*System.out.println("LeftF duty cycle, bus voltage: " + leftF.getAppliedOutput() + " " + leftF.getBusVoltage());
@@ -399,7 +407,7 @@ public class Drivetrain extends SubsystemBase {
   public boolean follow(Trajectory s, double t) {
     State p = s.sample(t);
 
-    DifferentialDriveWheelVoltages v = controller.calculate(position, leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters, rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters, p);
+    DifferentialDriveWheelVoltages v = controller.calculate(position, LEMA * Constants.RobotConstants.encoderToMeters, REMA * Constants.RobotConstants.encoderToMeters, p);
 
     //ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
     //DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);

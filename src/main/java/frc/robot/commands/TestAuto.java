@@ -38,21 +38,21 @@ public class TestAuto extends Command {
     ArrayList<Pose2d> list = new ArrayList<Pose2d>();
     // 3.93954
     //drive.set(0.9, 0.9);
-    /*list.add(new Pose2d(0, 0, new Rotation2d()));
-    list.add(new Pose2d(1.0, 0.5, new Rotation2d(Math.toRadians(0))));
-    list.add(new Pose2d(1.5, 0.0, new Rotation2d(Math.toRadians(-90))));
-    list.add(new Pose2d(2.0, -0.5, new Rotation2d()));
-    list.add(new Pose2d(2.5, 0.0, new Rotation2d(90)));
-    list.add(new Pose2d(3.0, 0.5, new Rotation2d()));
-    list.add(new Pose2d(4.5, 0.0, new Rotation2d()));*/
-    list.add(new Pose2d());
-    list.add(new Pose2d(0, 0, new Rotation2d(Math.toRadians(0))));
-    list.add(new Pose2d(6.0, 0, new Rotation2d(Math.toRadians(0))));
+    list.add(new Pose2d(0, 0, new Rotation2d()));
+    list.add(new Pose2d(2.0, 1.0, new Rotation2d(Math.toRadians(0))));
+    list.add(new Pose2d(3.0, 0.0, new Rotation2d(Math.toRadians(-90))));
+    list.add(new Pose2d(4.0, -1.0, new Rotation2d()));
+    list.add(new Pose2d(5.0, 0.0, new Rotation2d(90)));
+    list.add(new Pose2d(6.0, 1.0, new Rotation2d()));
+    list.add(new Pose2d(7.0, 0.0, new Rotation2d()));
+    //list.add(new Pose2d());
+    //list.add(new Pose2d(0, 0, new Rotation2d(Math.toRadians(0))));
+    //list.add(new Pose2d(10.0, 0, new Rotation2d(Math.toRadians(0))));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
             tconfig);
-    end = timer.get() + 6.0;
+    end = timer.get() + trajectory.getTotalTimeSeconds() + 4.0;
     drive.setIMU(0);
     drive.setPose(new Pose2d(0, 0, new Rotation2d()));
     // 3 means 11 inches

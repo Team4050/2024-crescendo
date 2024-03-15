@@ -34,7 +34,7 @@ public final class Constants {
     public static final double robotWidth = 22 * 2.54 / 100;
     public static final double robotHeight = 30 * 2.54 / 100;
     public static final double robotDepth = 30 * 2.54 / 100;
-    public static final double robotTrackWidth = 0.42545;
+    public static final double robotTrackWidth = 0.4318;
   }
 
   public static class MotorCANValues {
