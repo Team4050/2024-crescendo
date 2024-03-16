@@ -7,6 +7,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -23,21 +24,33 @@ public class Gun extends SubsystemBase {
   private RelativeEncoder encoderR;
   private double out = 0;
 
+  // TODO: switch l and r
   public Gun() {
     shooterL = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);
     shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
+    shooterL.setInverted(false);
+    shooterR.setInverted(true);
+    shooterL.setSmartCurrentLimit(60);
+    shooterR.setSmartCurrentLimit(60);
+    shooterL.setIdleMode(IdleMode.kCoast);
+    shooterR.setIdleMode(IdleMode.kCoast);
+    shooterL.clearFaults();
+    shooterR.clearFaults();
+    shooterR.follow(shooterL, true);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
-    Constraints pidConstraints = new Constraints(1, 1);
-    controllerL = new ProfiledPIDController(1, 0, 0, pidConstraints);
-    controllerR = new ProfiledPIDController(1, 0, 0, pidConstraints);
+    Constraints pidConstraints = new Constraints(100, 10);
+    controllerL = new ProfiledPIDController(0.008, 0, 0, pidConstraints);
+    controllerR = new ProfiledPIDController(0.008, 0, 0, pidConstraints);
   }
 
   @Override
   public void periodic() {
-    shooterL.set(controllerL.calculate(encoderL.getVelocity()));
-    shooterR.set(controllerR.calculate(encoderR.getVelocity()));
-    super.periodic();
+    /*double lpower = controllerL.calculate(encoderL.getVelocity() / 42);
+    shooterL.set(-lpower);
+    System.out.println("L power: " + lpower);
+    shooterR.set(-controllerR.calculate(encoderR.getVelocity() / 42));
+    super.periodic();*/
   }
 
   /**
@@ -46,7 +59,10 @@ public class Gun extends SubsystemBase {
    * @param speed Output percentage -1.0 - 1.0
    */
   public void fire(double speed, double spin) {
-    controllerL.setGoal(speed + spin);
-    controllerR.setGoal(speed - spin);
+    shooterL.setVoltage(speed * 12);
+    shooterR.setVoltage(speed * 12);
+    System.out.println("out: " + shooterR.getAppliedOutput());
+    //controllerL.setGoal(speed + spin);
+    //controllerR.setGoal(speed - spin);
   }
 }
