@@ -27,8 +27,8 @@ public class Gun extends SubsystemBase {
     shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
     shooterL.setInverted(false);
     shooterR.setInverted(true);
-    shooterL.setSmartCurrentLimit(60);
-    shooterR.setSmartCurrentLimit(60);
+    shooterL.setSmartCurrentLimit(80);
+    shooterR.setSmartCurrentLimit(80);
     shooterL.setIdleMode(IdleMode.kCoast);
     shooterR.setIdleMode(IdleMode.kCoast);
     shooterL.clearFaults();
