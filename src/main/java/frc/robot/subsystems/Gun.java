@@ -12,6 +12,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorCANValues;
 
+/*
+ * 30% works from 22 in
+ * 35%-100% work flush
+ * TODO: lookup table or linear function
+ */
+
 public class Gun extends SubsystemBase {
   /* */
   private CANSparkMax shooterL;
