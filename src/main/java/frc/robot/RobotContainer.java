@@ -77,7 +77,7 @@ public class RobotContainer {
     shooter = new Gun();
 
     // SmartDashboard.putData("Shooter speed", 1);
-    SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeed);
+    SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeedAmp);
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
@@ -207,9 +207,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(
         new RunCommand(
             () -> {
-              if (x.getAsBoolean()) {
-                //shooter.fire(Constants.MotorDriveValues.shooterSpeed , 0);
-              } else if (y.getAsBoolean()) {
+              if (y.getAsBoolean()) {
                 shooter.fire(adjustedShooterSpeed , 0);
               } else {
                 shooter.fire(0 , 0);
