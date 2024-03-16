@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,6 +57,7 @@ public class PathweaverTest extends Command {
         drive.setPose(initial);
     }
 
+    private int loop = 0;
     @Override
     public void execute() {
         if (t.get() > paths[i].getTotalTimeSeconds() + 3.0) {
@@ -65,6 +67,12 @@ public class PathweaverTest extends Command {
 
         if (i < paths.length) {
             drive.follow(paths[i], t.get());
+            loop++;
+            if (loop > 100) {
+                State s = paths[i].sample(t.get());
+                System.out.println("target: " + s);
+                loop = 0;
+            }
         }
     }
 
