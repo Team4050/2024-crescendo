@@ -6,6 +6,7 @@ import java.util.Set;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants;
 import frc.robot.subsystems.Gun;
 import frc.robot.subsystems.Intake;
 
@@ -30,21 +31,22 @@ public class Shoot extends Command {
 
     @Override
     public void initialize() {
+        timer.reset();
         timer.start();
         super.initialize();
     }
 
     @Override
     public void execute() {
-        intake.setConveyor(1);
-        shooter.fire(1, 0);
+        intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
+        shooter.fire(0.5, 0);
         super.execute();
     }
 
     @Override
     public boolean isFinished() {
         // TODO Auto-generated method stub
-        return timer.get() > 6.0;
+        return timer.get() > 2.66;
     }
 
     @Override

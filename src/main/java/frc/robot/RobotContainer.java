@@ -23,6 +23,7 @@ import frc.robot.commands.PathweaverTest;
 import frc.robot.commands.TestAuto;
 import frc.robot.commands.TimeTesting;
 import frc.robot.commands.Profiling;
+import frc.robot.commands.Shoot;
 import frc.robot.hazard.HazardXbox;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Gun;
@@ -94,6 +95,7 @@ public class RobotContainer {
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: test", new SequentialCommandGroup(
       new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 6.6, new Rotation2d(Math.toRadians(-180))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, true),
+      new Shoot(shooter, intake),
       new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
       new TestAuto(drivetrain, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false)
     ));

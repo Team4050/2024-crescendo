@@ -37,7 +37,7 @@ public class TestAuto extends Command {
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1.5));
+        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
     tconfig.setReversed(reverse);
     super.initialize();
     timer = new Timer();
