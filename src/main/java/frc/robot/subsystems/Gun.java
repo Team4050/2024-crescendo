@@ -39,7 +39,8 @@ public class Gun extends SubsystemBase {
     shooterR.setIdleMode(IdleMode.kCoast);
     shooterL.clearFaults();
     shooterR.clearFaults();
-    shooterR.follow(shooterL, true);
+    System.out.println(shooterR.isFollower());
+    //shooterR.follow(shooterL, true);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
     Constraints pidConstraints = new Constraints(100, 10);
@@ -62,8 +63,8 @@ public class Gun extends SubsystemBase {
    * @param speed Output percentage -1.0 - 1.0
    */
   public void fire(double speed, double spin) {
-    shooterL.setVoltage(speed * 12);
-    shooterR.setVoltage(speed * 12);
+    shooterL.setVoltage((speed + spin) * 12);
+    shooterR.setVoltage((speed - spin) * 12);
     System.out.println("out: " + shooterR.getAppliedOutput());
     //controllerL.setGoal(speed + spin);
     //controllerR.setGoal(speed - spin);

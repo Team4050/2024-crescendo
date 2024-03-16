@@ -67,6 +67,7 @@ public class RobotContainer {
       new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
   private double adjustedShooterSpeed = 0.6;
+  private double shooterspin = 0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -77,7 +78,8 @@ public class RobotContainer {
     shooter = new Gun();
 
     // SmartDashboard.putData("Shooter speed", 1);
-    SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeedAmp);
+    SmartDashboard.putNumber("shooter", Constants.MotorDriveValues.shooterSpeedAmp);
+    SmartDashboard.putNumber("shooter spin", Constants.MotorDriveValues.shooterSpeedAmp);
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: leave area", new TestAuto(drivetrain));
@@ -207,7 +209,7 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (y.getAsBoolean()) {
-                shooter.fire(adjustedShooterSpeed , 0);
+                shooter.fire(adjustedShooterSpeed, shooterspin);
               } else {
                 shooter.fire(0 , 0);
               }
@@ -218,6 +220,7 @@ public class RobotContainer {
   public void chooseControls() {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
     adjustedShooterSpeed = SmartDashboard.getNumber("shooter", 0);
+    shooterspin = SmartDashboard.getNumber("shooter spin", 0);
     /*switch (driveControlChooser.getSelected()) {
       case "def":
         drivetrain.setDefaultCommand(drivetrainDefault);
