@@ -82,7 +82,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     pdh = new PowerDistribution(1, ModuleType.kRev);
-    drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d()));
+    drivetrain = new Drivetrain(new Pose2d(0, 0, new Rotation2d(0)));
+    //drivetrain.setPose(new Pose2d(1.4, 6.6, new Rotation2d(-180)));
+    //drivetrain.setIMU(-180);
     intake = new Intake();
     shooter = new Gun();
 
@@ -90,8 +92,12 @@ public class RobotContainer {
     SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeedAmp);
 
     autoChooser = new SendableChooser<Command>();
-    autoChooser.setDefaultOption("Default auto: test", new PathweaverTest(drivetrain));
-    autoChooser.addOption("Test auto 2", new TestAuto(drivetrain));
+    autoChooser.setDefaultOption("Default auto: test", new SequentialCommandGroup(
+      new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 6.6, new Rotation2d(Math.toRadians(-180))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, true),
+      new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
+      new TestAuto(drivetrain, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false)
+    ));
+    autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(0)), new Pose2d(5.7, 6.7, new Rotation2d(0))}, false, true));
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
     autoChooser.addOption("motor profiling", new Profiling(drivetrain, m_driverController));
     autoChooser.addOption("Time sequence", 

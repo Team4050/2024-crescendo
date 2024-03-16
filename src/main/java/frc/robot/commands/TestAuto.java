@@ -23,38 +23,58 @@ public class TestAuto extends Command {
   private Timer timer;
   private double end;
   private Trajectory trajectory;
+  private Pose2d[] waypoints;
+  private boolean reverse;
+  private boolean reset;
 
-  public TestAuto(Drivetrain d) {
+  public TestAuto(Drivetrain d, Pose2d[] list, boolean reverse, boolean reset) {
     drive = d;
+    waypoints = list;
+    this.reverse = reverse;
+    this.reset = reset;
   }
 
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-        new TrajectoryConfig(Units.MetersPerSecond.of(1), Units.MetersPerSecondPerSecond.of(0.4));
+        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1.5));
+    tconfig.setReversed(reverse);
     super.initialize();
     timer = new Timer();
     timer.start();
     ArrayList<Pose2d> list = new ArrayList<Pose2d>();
+    if (reset) {
+      drive.setPose(waypoints[0]);
+      drive.setIMU(waypoints[0].getRotation().getDegrees());
+    }
+    System.out.println("Initial: " + drive.getTransformedIMU() + " " + drive.get());
+    for (int i = 0; i < waypoints.length; i++) {
+      list.add(waypoints[i]);
+    }
     // 3.93954
     //drive.set(0.9, 0.9);
-    list.add(new Pose2d(0, 0, new Rotation2d()));
+    /*list.add(new Pose2d(0, 0, new Rotation2d()));
     list.add(new Pose2d(2.0, 1.0, new Rotation2d(Math.toRadians(0))));
     list.add(new Pose2d(3.0, 0.0, new Rotation2d(Math.toRadians(-90))));
     list.add(new Pose2d(4.0, -1.0, new Rotation2d()));
     list.add(new Pose2d(5.0, 0.0, new Rotation2d(90)));
     list.add(new Pose2d(6.0, 1.0, new Rotation2d()));
-    list.add(new Pose2d(7.0, 0.0, new Rotation2d()));
-    //list.add(new Pose2d());
-    //list.add(new Pose2d(0, 0, new Rotation2d(Math.toRadians(0))));
+    list.add(new Pose2d(7.0, 0.0, new Rotation2d()));*/
+    //list.add(new Pose2d(1.4, 5.5, new Rotation2d()));
+    //list.add(new Pose2d(6.0, 6.7, new Rotation2d(Math.toRadians(0))));
+
+    //list.add(new Pose2d(6.0, 6.7, new Rotation2d(Math.toRadians(0))));
+    //list.add(new Pose2d(1.4, 5.5, new Rotation2d()));
+    //tconfig.setReversed(true);
+
     //list.add(new Pose2d(10.0, 0, new Rotation2d(Math.toRadians(0))));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
             tconfig);
     end = timer.get() + trajectory.getTotalTimeSeconds() + 4.0;
-    drive.setIMU(0);
-    drive.setPose(new Pose2d(0, 0, new Rotation2d()));
+    //drive.setIMU(0);
+    //drive.setPose(list.get(0));
     // 3 means 11 inches
   }
 
@@ -65,7 +85,7 @@ public class TestAuto extends Command {
     drive.follow(trajectory, timer.get());
     State s = trajectory.sample(timer.get());
     loop++;
-    if (loop > 200) {
+    if (loop > 500) {
       System.out.println(
           "Target: "
               + s.poseMeters.getX()

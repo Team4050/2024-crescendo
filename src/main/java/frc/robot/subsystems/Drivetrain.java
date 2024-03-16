@@ -145,8 +145,8 @@ public class Drivetrain extends SubsystemBase {
       imu = null;
     }
     // X, Y, Rotation in radians, XVel, YVel
-    Vector<N5> qelems = VecBuilder.fill(0.1, 0.1, Math.PI / 45, 0.15, 0.15);
-    Vector<N2> relems = VecBuilder.fill(0.4, 0.4);
+    Vector<N5> qelems = VecBuilder.fill(0.1, 0.1, Math.PI / 90, 0.15, 0.15);
+    Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
 
     //Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
     //Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
@@ -167,7 +167,7 @@ public class Drivetrain extends SubsystemBase {
             RobotConstants.gearRatio, 
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
-            96.028, 
+            50.265,//96.028, 
             0.125, 
             0.125);
 
@@ -308,31 +308,6 @@ public class Drivetrain extends SubsystemBase {
     rightControl.setReference(rVolts, ControlType.kVoltage);
   }
 
-  public double[] setVelocity(double lVel, double rVel) {
-    //SmartDashboard.putNumber("Left target:", lVel);
-    //SmartDashboard.putNumber("Right target:", rVel);
-    // velocity (m/s) / circumference of wheel * 42 encoder units per rotation / 10 (u/100ms)
-
-    controller.calculate(position, lVel, rVel, null);
-
-    double lEncoderSpeed = lVel / (RobotConstants.encoderToMeters);
-    double rEncoderSpeed = rVel / (RobotConstants.encoderToMeters);
-
-    leftControl.setReference(lEncoderSpeed, ControlType.kVelocity);
-    rightControl.setReference(rEncoderSpeed, ControlType.kVelocity);
-    System.out.println(
-        "Speed Error:"
-            + (lEncoderSpeed - leftEncoder.getVelocity())
-            + " "
-            + (rEncoderSpeed - rightEncoder.getVelocity()));
-
-    // System.out.println("Measured encoder speeds:" + leftEncoder.getVelocity() + " " +
-    // rightEncoder.getVelocity());
-    // System.out.println("Measured encoder positions: " + leftEncoder.getPosition() + " " +
-    // rightEncoder.getPosition());
-    return null;
-  }
-
   /**
    * Align the robot shooter to face a point at a set distance from it
    *
@@ -350,6 +325,10 @@ public class Drivetrain extends SubsystemBase {
     return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
   }
 
+  /**
+   * Set IMU angle in degrees
+   * @param yaw
+   */
   public void setIMU(double yaw) {
     imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
   }
@@ -369,7 +348,7 @@ public class Drivetrain extends SubsystemBase {
     REMA = REMA + alpha * (rightEncoder.getVelocity() - REMA);
 
     loop++;
-    if (loop > 50) {
+    if (loop > 150) {
       /*System.out.println("LeftF duty cycle, bus voltage: " + leftF.getAppliedOutput() + " " + leftF.getBusVoltage());
       System.out.println("LeftR duty cycle, bus voltage: " + leftR.getAppliedOutput() + " " + leftR.getBusVoltage());
       System.out.println("RightF duty cycle, bus voltage: " + rightF.getAppliedOutput() + " " + rightF.getBusVoltage());

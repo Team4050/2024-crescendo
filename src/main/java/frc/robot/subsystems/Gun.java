@@ -61,7 +61,7 @@ public class Gun extends SubsystemBase {
   public void fire(double speed, double spin) {
     shooterL.setVoltage(speed * 12);
     shooterR.setVoltage(speed * 12);
-    System.out.println("out: " + shooterR.getAppliedOutput());
+    //System.out.println("out: " + shooterR.getAppliedOutput());
     //controllerL.setGoal(speed + spin);
     //controllerR.setGoal(speed - spin);
   }
