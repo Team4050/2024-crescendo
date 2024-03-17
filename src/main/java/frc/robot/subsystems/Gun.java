@@ -14,6 +14,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorCANValues;
 
+/*
+ * 30% works from 22 in
+ * 35%-100% work flush
+ * TODO: lookup table or linear function
+ */
+
 public class Gun extends SubsystemBase {
   /* */
   private CANSparkMax shooterL;
@@ -30,13 +36,14 @@ public class Gun extends SubsystemBase {
     shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
     shooterL.setInverted(false);
     shooterR.setInverted(true);
-    shooterL.setSmartCurrentLimit(60);
-    shooterR.setSmartCurrentLimit(60);
+    shooterL.setSmartCurrentLimit(80);
+    shooterR.setSmartCurrentLimit(80);
     shooterL.setIdleMode(IdleMode.kCoast);
     shooterR.setIdleMode(IdleMode.kCoast);
     shooterL.clearFaults();
     shooterR.clearFaults();
-    shooterR.follow(shooterL, true);
+    System.out.println(shooterR.isFollower());
+    //shooterR.follow(shooterL, true);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
     Constraints pidConstraints = new Constraints(100, 10);
@@ -59,9 +66,9 @@ public class Gun extends SubsystemBase {
    * @param speed Output percentage -1.0 - 1.0
    */
   public void fire(double speed, double spin) {
-    shooterL.setVoltage(speed * 12);
-    shooterR.setVoltage(speed * 12);
-    //System.out.println("out: " + shooterR.getAppliedOutput());
+    shooterL.setVoltage((speed + spin) * 12);
+    shooterR.setVoltage((speed - spin) * 12);
+    System.out.println("out: " + shooterR.getAppliedOutput());
     //controllerL.setGoal(speed + spin);
     //controllerR.setGoal(speed - spin);
   }

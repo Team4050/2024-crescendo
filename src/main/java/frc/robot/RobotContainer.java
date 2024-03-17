@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -72,14 +73,18 @@ public class RobotContainer {
   private final Trigger y = m_secondaryController.y();
   private final Trigger b = m_secondaryController.b();
   private final Trigger mb = m_driverController.b();
+  private final Trigger leftTrigger = m_secondaryController.leftTrigger();
   private final Trigger rightTrigger = m_secondaryController.rightTrigger();
   //private final Joystick m_driverJoystick =
   //    new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
   private double adjustedShooterSpeed = 0.6;
+  private double shooterspin = 0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+
     // Configure the trigger bindings
     // limelight = new PhotonCamera(Constants.Sensors.LimelightName);
     pdh = new PowerDistribution(1, ModuleType.kRev);
@@ -90,7 +95,8 @@ public class RobotContainer {
     shooter = new Gun();
 
     // SmartDashboard.putData("Shooter speed", 1);
-    SmartDashboard.putNumber("shooter", -Constants.MotorDriveValues.shooterSpeedAmp);
+    SmartDashboard.putNumber("shooter", Constants.MotorDriveValues.shooterSpeedAmp);
+    SmartDashboard.putNumber("shooter spin", Constants.MotorDriveValues.shooterSpeedAmp);
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: test", new SequentialCommandGroup(
@@ -216,7 +222,6 @@ public class RobotContainer {
             () -> {
               intake.setIntake(rightTrigger.getAsBoolean(), b.getAsBoolean());
 
-              // Robot error on X press with conveyor enabled
               if (x.getAsBoolean()) {
                 intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
               } else {
@@ -228,10 +233,13 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (y.getAsBoolean()) {
-                shooter.fire(adjustedShooterSpeed , 0);
+                shooter.fire(adjustedShooterSpeed, shooterspin);
+              } else if (leftTrigger.getAsBoolean()) {
+                shooter.fire(1.0, 0);
               } else {
                 shooter.fire(0 , 0);
               }
+
             },
             shooter));
   }
@@ -239,6 +247,7 @@ public class RobotContainer {
   public void chooseControls() {
     drivetrain.setDefaultCommand(driveControlChooser.getSelected());
     adjustedShooterSpeed = SmartDashboard.getNumber("shooter", 0);
+    shooterspin = SmartDashboard.getNumber("shooter spin", 0);
     /*switch (driveControlChooser.getSelected()) {
       case "def":
         drivetrain.setDefaultCommand(drivetrainDefault);
