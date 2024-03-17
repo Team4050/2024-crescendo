@@ -375,12 +375,12 @@ public class Drivetrain extends SubsystemBase {
     //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
     //System.out.println("Pos: " + position.getX());
 
-    /*Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
+    Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
-        //System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
+        System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
         position = pose.get().estimatedPose.toPose2d();
         setIMU(position.getRotation().getDegrees());
-    }*/
+    }
   }
 
   public boolean follow(Trajectory s, double t) {
