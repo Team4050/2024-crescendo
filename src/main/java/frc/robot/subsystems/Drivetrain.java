@@ -63,7 +63,7 @@ public class Drivetrain extends SubsystemBase {
 
   /* Sensors */
   private HazardVision vision;
-  private boolean useVision = true;
+  private boolean useVision = false;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
   private boolean useIMU = true;
@@ -148,12 +148,6 @@ public class Drivetrain extends SubsystemBase {
     Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 80, 0.15, 0.15);
     Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
 
-    //Matrix<N2, N2> A = MatBuilder.fill(N2.instance, N2.instance, -0.2, 0.1, 0.1, -0.2);
-    //Matrix<N2, N2> B = MatBuilder.fill(N2.instance, N2.instance, 0.2, -0.1, -0.1, 0.2);
-
-    //double maxV = A.solve(B.times(VecBuilder.fill(12.0, 12.0))).times(-1.0).get(0, 0);
-    //System.out.println(maxV);
-
     // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1
     // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia (wikipedia as source lol),
     // Solid rectangular cuboid model:
@@ -186,13 +180,53 @@ public class Drivetrain extends SubsystemBase {
     ramController = new RamseteController(1.6, 0.7);
   }
 
-  private void configMotor(TalonSRX m) {
-    m.config_kP(0, 0);
-    m.config_kI(0, 0);
-    m.config_kD(0, 0);
-    m.config_kF(0, 0);
-  }
-
+  /**
+   * https://file.tavsys.net/control/controls-engineering-in-frc.pdf#Hfootnote.27
+   * State vector (velocities)
+   * x = [ vl ]
+   *     [ vr ]
+   *
+   * Input vec (Voltages)
+   * u = [ Vl ]
+   *     [ Vr ]
+   *
+   * @param r = wheel radius  
+   * @param rb = wheelbase radius 
+   * @param Gl = gear ratio between left wheels and motor
+   * @param Gr = gear ration between right wheels and motor
+   * @param J = moment of inertia  
+   * @param m = robot mass
+   * @param Kt = motor torque constant
+   * @param Kv = free spinning rpm at 1 V
+   * @param Rl = left motor resistance
+   * @param Rr = right motor resistance
+   * 
+   * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
+   * C1 = -Gl^2 * Kt / Kv * R * r^2
+   * C2 = Gl * Kt / R * r
+   * C3 = -Gr^2 * Kt / Kv * R * r^2
+   * C4 = Gr * Kt / R * r
+   * c1 = 1 / m + rb^2 / J
+   * c2 = 1 / m - rb^2 / J
+   *
+   * Input matrix
+   * A = [ c1 * C1  c2 * C3 ]
+   *     [ c2 * C1  c1 * C3 ]
+   *
+   * System matrix
+   * B = [ c1 * C2  c2 * C4 ]
+   *     [ c2 * C2  c1 * C4 ]
+   * 
+   * Kv for NEO is 917 under no load, 917 in RPM * 2 * PI * / 60 = 96.028
+   * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
+   * https://www.revrobotics.com/content/docs/REV-21-1651-DS.pdf
+   * 
+   * determining Kt is simply an inversion of Kv and a unit conversion, or stall torque over stall current
+   * Kt = 60 / 2pi * Kv  Kt = T / I = 0.0108
+   * https://motors.vex.com/other-motors/neo550
+   * https://electronics.stackexchange.com/questions/531406/how-to-calculate-the-torque-constant-for-a-bldc-motor
+   * @return A LinearSystem that represents the drivetrain
+   */
   private LinearSystem<N2, N2, N2> buildPlant(
       double r,
       double rb,
@@ -204,43 +238,6 @@ public class Drivetrain extends SubsystemBase {
       double Rl,
       double Rr) {
     /*
-     * https://file.tavsys.net/control/controls-engineering-in-frc.pdf#Hfootnote.27
-     * State vector (velocities)
-     * x = [ vl ]
-     *     [ vr ]
-     *
-     * Input vec (Voltages)
-     * u = [ Vl ]
-     *     [ Vr ]
-     *
-     * r = wheel radius  rb = wheelbase radius  G = gear ratio between wheels and motor (left/right)
-     * J = moment of inertia  m = robot mass
-     * Kt = motor torque constant, Kv = free spinning rpm at 1 V
-     * R = motor resistance (left/right)
-     * torque = G * Kt / R * V - G^2 * Kt / Kv * R * w
-     * C1 = -Gl^2 * Kt / Kv * R * r^2
-     * C2 = Gl * Kt / R * r
-     * C3 = -Gr^2 * Kt / Kv * R * r^2
-     * C4 = Gr * Kt / R * r
-     * c1 = 1 / m + rb^2 / J
-     * c2 = 1 / m - rb^2 / J
-     *
-     * Input matrix
-     * A = [ c1 * C1  c2 * C3 ]
-     *     [ c2 * C1  c1 * C3 ]
-     *
-     * System matrix
-     * B = [ c1 * C2  c2 * C4 ]
-     *     [ c2 * C2  c1 * C4 ]
-     * 
-     * Kv for NEO is 917 under no load, 917 in RPM * 2 * PI * / 60 = 96.028
-     * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
-     * https://www.revrobotics.com/content/docs/REV-21-1651-DS.pdf
-     * 
-     * determining Kt is simply an inversion of Kv and a unit conversion, or stall torque over stall current
-     * Kt = 60 / 2pi * Kv  Kt = T / I = 0.0108
-     * https://motors.vex.com/other-motors/neo550
-     * https://electronics.stackexchange.com/questions/531406/how-to-calculate-the-torque-constant-for-a-bldc-motor
      */
     double Kt = 0.97 / 100;//1.08 * 2 / 111;//60 / (2 * Math.PI * Kv);
     double C1 = -Math.pow(Gl, 2) * Kt / (Rl * Kv * Math.pow(r, 2));
@@ -250,7 +247,6 @@ public class Drivetrain extends SubsystemBase {
     double c1 = 1 / m + (Math.pow(rb, 2) / J);
     double c2 = 1 / m - (Math.pow(rb, 2) / J);
 
-    System.out.println(Kt);
     System.out.println("constants: " + c1 + " " + c2);
 
     Matrix<N2, N2> A =
@@ -287,9 +283,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void set(double lSpeed, double rSpeed) {
     leftF.set(lSpeed);
-    // leftR.set(lSpeed);
     rightF.set(rSpeed);
-    // rightR.set(rSpeed);
   }
 
   // setVoltage and setReference should be the same thing, but the follower API may be causing issues
@@ -297,10 +291,6 @@ public class Drivetrain extends SubsystemBase {
   public void setV(double lVolts, double rVolts) {
     leftControl.setReference(lVolts, ControlType.kVoltage);
     rightControl.setReference(rVolts, ControlType.kVoltage);
-    //leftF.setVoltage(lVolts);
-    //leftR.setVoltage(lVolts);
-    //rightF.setVoltage(rVolts);
-    //rightR.setVoltage(rVolts);
   }
 
   public void setVcontrol(double lVolts, double rVolts) {
@@ -321,7 +311,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getTransformedIMU() {
-    //return new Rotation2d();
     return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
   }
 
@@ -330,10 +319,12 @@ public class Drivetrain extends SubsystemBase {
    * @param yaw
    */
   public void setIMU(double yaw) {
+    System.out.println("Reset IMU to: " + yaw);
     imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
   }
 
   public void setPose(Pose2d manual) {
+    System.out.println("Reset position to: " + manual);
     position = manual;
     estimator.resetPosition(getTransformedIMU(), leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, manual);
   }
@@ -354,6 +345,8 @@ public class Drivetrain extends SubsystemBase {
       System.out.println("RightF duty cycle, bus voltage: " + rightF.getAppliedOutput() + " " + rightF.getBusVoltage());
       System.out.println("RightR duty cycle, bus voltage: " + rightR.getAppliedOutput() + " " + rightR.getBusVoltage());
       */
+      //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
+      //System.out.println("Pos: " + position.getX());
       //System.out.println(getEncoderV()[0] + " " + getEncoderV()[1]);
       System.out.println(position);
       System.out.println("imu yaw: " + getTransformedIMU());
@@ -371,10 +364,6 @@ public class Drivetrain extends SubsystemBase {
                 leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters,
                 rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters));
 
-
-    //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
-    //System.out.println("Pos: " + position.getX());
-
     Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
     if (pose.isPresent()) {
         System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
@@ -387,12 +376,7 @@ public class Drivetrain extends SubsystemBase {
     State p = s.sample(t);
 
     DifferentialDriveWheelVoltages v = controller.calculate(position, LEMA * Constants.RobotConstants.encoderToMeters, REMA * Constants.RobotConstants.encoderToMeters, p);
-
-    //ChassisSpeeds speeds = ramController.calculate(new Pose2d(), p);
-    //DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
-    //System.out.println("Velocity target: " + p.velocityMetersPerSecond + " " + (leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters));
-    //System.out.println("Volts: " + v.left + " " + -v.right);
-    System.out.println("err: " + (p.velocityMetersPerSecond - (((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters) + (rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) / 2)));
+    //System.out.println("err: " + (p.velocityMetersPerSecond - (((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters) + (rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) / 2)));
     setV(v.left, v.right);
     return controller.atReference();
   }
