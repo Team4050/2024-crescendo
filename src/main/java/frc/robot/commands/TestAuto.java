@@ -32,6 +32,7 @@ public class TestAuto extends Command {
     waypoints = list;
     this.reverse = reverse;
     this.reset = reset;
+    timer = new Timer();
   }
 
   @Override
@@ -39,15 +40,18 @@ public class TestAuto extends Command {
     TrajectoryConfig tconfig =
         new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
     tconfig.setReversed(reverse);
-    super.initialize();
-    timer = new Timer();
+
+    timer.reset();
     timer.start();
+
     ArrayList<Pose2d> list = new ArrayList<Pose2d>();
+
     if (reset) {
       drive.setPose(waypoints[0]);
-      drive.setIMU(waypoints[0].getRotation().getDegrees());
     }
+
     System.out.println("Initial: " + drive.getTransformedIMU() + " " + drive.get());
+
     for (int i = 0; i < waypoints.length; i++) {
       list.add(waypoints[i]);
     }
@@ -73,9 +77,6 @@ public class TestAuto extends Command {
             list,
             tconfig);
     end = timer.get() + trajectory.getTotalTimeSeconds() + 4.0;
-    //drive.setIMU(0);
-    //drive.setPose(list.get(0));
-    // 3 means 11 inches
   }
 
   int loop = 0;

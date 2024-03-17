@@ -66,7 +66,7 @@ public class Drivetrain extends SubsystemBase {
   private boolean useVision = false;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
-  private boolean useIMU = true;
+  private boolean useIMU = false;
 
   private CANcoder leftExternalEncoder;
   private CANcoder rightExternalEncoder;
@@ -136,10 +136,9 @@ public class Drivetrain extends SubsystemBase {
       vision = null;
     }
     if (useIMU) {
-    imu = new ADIS16470_IMU();
-    imu.configCalTime(ADIS16470_IMU.CalibrationTime._4s);
-    imu.calibrate();
-    
+      imu = new ADIS16470_IMU();
+      imu.configCalTime(ADIS16470_IMU.CalibrationTime._4s);
+      imu.calibrate();
     }
     else {
       imu = null;
@@ -311,22 +310,29 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getTransformedIMU() {
-    return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
+    if (useIMU) {
+      return new Rotation2d(Math.toRadians(imu.getAngle(IMUAxis.kRoll)));
+    }
+    return new Rotation2d();
   }
 
   /**
-   * Set IMU angle in degrees
+   * Set IMU angle in degrees. This method does nothing if the IMU is disabled
    * @param yaw
    */
   public void setIMU(double yaw) {
     System.out.println("Reset IMU to: " + yaw);
-    imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
+    if (useIMU) {
+      imu.setGyroAngle(Constants.Sensors.robotYawAxis, yaw);
+    }
   }
 
+  // TODO: Test if issues with pose resetting have been fixed
   public void setPose(Pose2d manual) {
-    System.out.println("Reset position to: " + manual);
-    position = manual;
+    setIMU(manual.getRotation().getDegrees());
     estimator.resetPosition(getTransformedIMU(), leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, manual);
+    update();
+    System.out.println("Reset position to: " + position);
   }
 
   int loop = 0;
@@ -364,11 +370,13 @@ public class Drivetrain extends SubsystemBase {
                 leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters,
                 rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters));
 
-    Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
-    if (pose.isPresent()) {
-        System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
-        position = pose.get().estimatedPose.toPose2d();
-        setIMU(position.getRotation().getDegrees());
+    if (useVision) {
+      Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
+      if (pose.isPresent()) {
+          System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
+          position = pose.get().estimatedPose.toPose2d();
+          setIMU(position.getRotation().getDegrees());
+      }
     }
   }
 
