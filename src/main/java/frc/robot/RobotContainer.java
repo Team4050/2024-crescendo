@@ -234,7 +234,7 @@ public class RobotContainer {
             () -> {
               if (y.getAsBoolean()) {
                 //shooter.fire(adjustedShooterSpeed, shooterspin);
-                shooter.fireCompensate(0);
+                shooter.fireCompensate(drivetrain.get());
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(1.0, 0);
               } else {

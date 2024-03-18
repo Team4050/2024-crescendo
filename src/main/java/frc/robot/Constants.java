@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
@@ -35,6 +37,11 @@ public final class Constants {
     public static final double robotHeight = 30 * 2.54 / 100;
     public static final double robotDepth = 30 * 2.54 / 100;
     public static final double robotTrackWidth = 0.4318;
+  }
+
+  public static class FieldConstants {
+    public static Pose2d speakerLocation = new Pose2d(16.579342, 4.982717999999999, new Rotation2d(Math.toRadians(180)));
+    public static Pose2d speakerLocation2 = new Pose2d(-0.038099999999999995, 5.547867999999999, new Rotation2d(0));
   }
 
   public static class MotorCANValues {

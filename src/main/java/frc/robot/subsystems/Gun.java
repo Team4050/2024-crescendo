@@ -10,8 +10,13 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.MotorCANValues;
 
 /*
@@ -68,12 +73,24 @@ public class Gun extends SubsystemBase {
     //controllerR.setGoal(speed - spin);
   }
 
+  public Pose2d getClosestSpeaker(Pose2d pose) {
+    Translation2d dif = FieldConstants.speakerLocation.getTranslation().minus(pose.getTranslation());
+    Translation2d dif2 = FieldConstants.speakerLocation2.getTranslation().minus(pose.getTranslation());
+    if (dif2.getNorm() < dif.getNorm()) {
+      return FieldConstants.speakerLocation2;
+    }
+    return FieldConstants.speakerLocation;
+  }
+
   /**
    * Fire the shooter and compensate for distance from speaker
    * 
    * @param distance
    */
-  public void fireCompensate(double distance) {
+  public void fireCompensate(Pose2d pose) {
+    Pose2d speaker = getClosestSpeaker(pose);
+    double distance = speaker.minus(pose).getTranslation().getNorm();
+
     if (distance > 1) {
       System.out.println("Distance too far to shoot");
       return;
