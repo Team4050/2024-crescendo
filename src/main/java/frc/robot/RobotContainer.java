@@ -233,7 +233,8 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (y.getAsBoolean()) {
-                shooter.fire(adjustedShooterSpeed, shooterspin);
+                //shooter.fire(adjustedShooterSpeed, shooterspin);
+                shooter.fireCompensate(0);
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(1.0, 0);
               } else {

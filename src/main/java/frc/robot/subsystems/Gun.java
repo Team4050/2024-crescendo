@@ -24,16 +24,14 @@ public class Gun extends SubsystemBase {
   /* */
   private CANSparkMax shooterL;
   private CANSparkMax shooterR;
-  private ProfiledPIDController controllerL;
-  private ProfiledPIDController controllerR;
   private RelativeEncoder encoderL;
   private RelativeEncoder encoderR;
   private double out = 0;
 
   // TODO: switch l and r
   public Gun() {
-    shooterL = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);
-    shooterR = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
+    shooterL = new CANSparkMax(MotorCANValues.shooterWheelR, MotorType.kBrushless);
+    shooterR = new CANSparkMax(MotorCANValues.shooterWheelL, MotorType.kBrushless);
     shooterL.setInverted(false);
     shooterR.setInverted(true);
     shooterL.setSmartCurrentLimit(80);
@@ -42,13 +40,10 @@ public class Gun extends SubsystemBase {
     shooterR.setIdleMode(IdleMode.kCoast);
     shooterL.clearFaults();
     shooterR.clearFaults();
-    System.out.println(shooterR.isFollower());
+    //System.out.println(shooterL.isFollower());
     //shooterR.follow(shooterL, true);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
-    Constraints pidConstraints = new Constraints(100, 10);
-    controllerL = new ProfiledPIDController(0.008, 0, 0, pidConstraints);
-    controllerR = new ProfiledPIDController(0.008, 0, 0, pidConstraints);
   }
 
   @Override
@@ -66,10 +61,28 @@ public class Gun extends SubsystemBase {
    * @param speed Output percentage -1.0 - 1.0
    */
   public void fire(double speed, double spin) {
-    shooterL.setVoltage((speed + spin) * 12);
-    shooterR.setVoltage((speed - spin) * 12);
-    System.out.println("out: " + shooterR.getAppliedOutput());
+    shooterR.setVoltage((speed + spin) * 12);
+    shooterL.setVoltage((speed - spin) * 12);
+    System.out.println("out: " + shooterL.getAppliedOutput());
     //controllerL.setGoal(speed + spin);
     //controllerR.setGoal(speed - spin);
+  }
+
+  /**
+   * Fire the shooter and compensate for distance from speaker
+   * 
+   * @param distance
+   */
+  public void fireCompensate(double distance) {
+    if (distance > 1) {
+      System.out.println("Distance too far to shoot");
+      return;
+    }
+    if (distance > 0.5588) {
+      fire(0.3, 0);
+      return;
+    }
+    fire(0.35, 0);
+    return;
   }
 }
