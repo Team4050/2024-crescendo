@@ -1,7 +1,11 @@
 package frc.robot.commands;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.Gun;
 import frc.robot.subsystems.Intake;
 
@@ -9,7 +13,6 @@ public class IntakeNote extends Command {
   private Gun gun;
   private Intake intake;
   private Timer timer;
-  private double conveyorSpeed = -1.0;
 
   public IntakeNote(Gun gun, Intake intake) {
     this.intake = intake;
@@ -28,16 +31,20 @@ public class IntakeNote extends Command {
   @Override
   public void execute() {
     intake.setIntake(true, false);
-    intake.setConveyor(conveyorSpeed);
-
-    // TODO: better logic & determine target distance
-
     super.execute();
   }
 
   @Override
   public boolean isFinished() {
-      return intake.get() || timer.get() > 4.0;
+      return timer.get() > 4.0;
+  }
+
+  @Override
+  public Set<Subsystem> getRequirements() {
+      HashSet<Subsystem> reqs = new HashSet<Subsystem>();
+      reqs.add(gun);
+      reqs.add(intake);
+      return reqs;
   }
 
   @Override

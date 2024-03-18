@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.math.system.LinearSystem;
@@ -51,6 +52,7 @@ public class Drivetrain extends SubsystemBase {
   private IdleMode idleMode = IdleMode.kBrake;
 
   private LTVDifferentialDriveController controller;
+  private LinearSystem<N2, N2, N2> drivetrainModel;
   private RamseteController ramController;
 
   private DifferentialDrive drivetrain;
@@ -154,7 +156,7 @@ public class Drivetrain extends SubsystemBase {
     // 1/12 * m * (h^2 + w^2)
     // TODO: find L & R resistance R = V/I (stall) = 12V/100A = 0.12?
     System.out.println(0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)));
-    LinearSystem<N2, N2, N2> plant =
+    drivetrainModel =
         buildPlant(Constants.RobotConstants.wheelRadMeters, 
             0.27305,
             RobotConstants.gearRatio, 
@@ -165,7 +167,7 @@ public class Drivetrain extends SubsystemBase {
             0.125, 
             0.125);
 
-    controller = new LTVDifferentialDriveController(plant, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
+    controller = new LTVDifferentialDriveController(drivetrainModel, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
     estimator =
         new DifferentialDrivePoseEstimator(
@@ -388,5 +390,11 @@ public class Drivetrain extends SubsystemBase {
     //System.out.println("err: " + (p.velocityMetersPerSecond - (((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters) + (rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) / 2)));
     setV(v.left, v.right);
     return controller.atReference();
+  }
+
+  // TODO: method of direct use of controller for speaker and amp alignment?
+  public void control(Pose2d targetPose, double lVel, double rVel) {
+    DifferentialDriveWheelVoltages v = controller.calculate(position, LEMA * Constants.RobotConstants.encoderToMeters, REMA * Constants.RobotConstants.encoderToMeters, targetPose, lVel, rVel);
+    setV(v.left, v.right);
   }
 }
