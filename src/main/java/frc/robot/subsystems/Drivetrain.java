@@ -30,6 +30,7 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -374,7 +375,7 @@ public class Drivetrain extends SubsystemBase {
       Optional<EstimatedRobotPose> pose = vision.getEstimatedGlobalPose(position);
       if (pose.isPresent()) {
           System.out.println("Vision estimated pose:" + pose.get().estimatedPose.toString());
-          position = pose.get().estimatedPose.toPose2d();
+          estimator.addVisionMeasurement(pose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
           setIMU(position.getRotation().getDegrees());
       }
     }
