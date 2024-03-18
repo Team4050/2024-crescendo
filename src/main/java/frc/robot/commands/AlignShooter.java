@@ -9,6 +9,8 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.RobotConstants;
 import frc.robot.subsystems.Drivetrain;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,15 +23,16 @@ public class AlignShooter extends Command {
   private Drivetrain drivetrain;
   // TODO: test position
   // 16.579342, 4.982717999999999 
-  private static Pose2d speakerLocation = new Pose2d(16.579342, 4.982717999999999, new Rotation2d(Math.toRadians(180)));
-  private static Pose2d speakerLocation2 = new Pose2d(-0.038099999999999995, 5.547867999999999, new Rotation2d(0));
+  // private static Pose2d speakerLocation = new Pose2d(16.579342, 4.982717999999999, new Rotation2d(Math.toRadians(180)));
+  // private static Pose2d speakerLocation2 = new Pose2d(-0.038099999999999995, 5.547867999999999, new Rotation2d(0));
   private static double distMeters = 1;
   private Pose2d targetPose;
   private Trajectory s;
   private Timer t;
 
-  public AlignShooter(Drivetrain d) {
+  public AlignShooter(Drivetrain d, Pose2d initial) {
     drivetrain = d;
+    d.setPose(initial);
   }
 
   @Override
@@ -37,13 +40,13 @@ public class AlignShooter extends Command {
     //ArrayList<Pose2d> points = new ArrayList<Pose2d>(0);
     //Pose2d closestSpeaker = speakerLocation;
     // Difference vector
-    Translation2d dif = speakerLocation.getTranslation().minus(drivetrain.get().getTranslation());
-    Translation2d dif2 = speakerLocation.getTranslation().minus(drivetrain.get().getTranslation());
+    Translation2d dif = FieldConstants.speakerLocation.getTranslation().minus(drivetrain.get().getTranslation());
+    Translation2d dif2 = FieldConstants.speakerLocation2.getTranslation().minus(drivetrain.get().getTranslation());
     if (dif2.getNorm() < dif.getNorm()) {
       dif = dif2;
       //closestSpeaker = speakerLocation2;
     }
-    targetPose = new Pose2d(drivetrain.get().getX(), drivetrain.get().getY(), new Rotation2d(dif.getX(), dif.getY()));
+    targetPose = new Pose2d(drivetrain.get().getX(), drivetrain.get().getY(), new Rotation2d(-dif.getX(), -dif.getY()));
     // Normalize
     //dif = dif.times(1 / dif.getNorm());
 
@@ -72,7 +75,7 @@ public class AlignShooter extends Command {
     Optional<EstimatedRobotPose> visionEstimation = drivetrain.getRawCameraDetection();
     if (visionEstimation.isPresent()) {
       Translation2d dif =
-          speakerLocation
+          FieldConstants.speakerLocation
               .getTranslation()
               .minus(visionEstimation.get().estimatedPose.toPose2d().getTranslation());
       // Normalize
@@ -81,7 +84,7 @@ public class AlignShooter extends Command {
       Pose2d p =
           new Pose2d(
               // Scale difference norm by desired length
-              speakerLocation.getTranslation().plus(dif.times(distMeters)),
+              FieldConstants.speakerLocation.getTranslation().plus(dif.times(distMeters)),
               // Rotation is inverse of distance norm
               new Rotation2d(-dif.getX(), -dif.getY()));
       // 2 degrees tolerance
@@ -103,7 +106,7 @@ public class AlignShooter extends Command {
   @Override
   public boolean isFinished() {
     // TODO Auto-generated method stub
-    return t.get() > s.getTotalTimeSeconds();
+    return t.get() > 8.0;//s.getTotalTimeSeconds();
   }
 
   @Override

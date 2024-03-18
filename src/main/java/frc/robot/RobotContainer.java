@@ -107,7 +107,7 @@ public class RobotContainer {
     ));
     autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(0)), new Pose2d(5.7, 6.7, new Rotation2d(0))}, false, true));
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
-    autoChooser.addOption("motor profiling", new Profiling(drivetrain, m_driverController));
+    autoChooser.addOption("Align", new AlignShooter(drivetrain, new Pose2d(1.4, 5.5, new Rotation2d())));
     autoChooser.addOption("Time sequence", 
         new SequentialCommandGroup(
             new TimeTesting(drivetrain, 90, true), 
@@ -233,8 +233,8 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (y.getAsBoolean()) {
-                //shooter.fire(adjustedShooterSpeed, shooterspin);
-                shooter.fireCompensate(drivetrain.get());
+                shooter.fire(adjustedShooterSpeed, shooterspin);
+                //shooter.fireCompensate(drivetrain.get());
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(1.0, 0);
               } else {

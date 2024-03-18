@@ -66,10 +66,10 @@ public class Drivetrain extends SubsystemBase {
 
   /* Sensors */
   private HazardVision vision;
-  private boolean useVision = false;
+  private boolean useVision = true;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
-  private boolean useIMU = false;
+  private boolean useIMU = true;
 
   private CANcoder leftExternalEncoder;
   private CANcoder rightExternalEncoder;

@@ -75,8 +75,7 @@ public final class Constants {
 
   public static class Sensors {
     public static final String LimelightName = "Limelight";
-    public static final Transform3d RobotToCamera = new Transform3d(0, 0, 0.6477, new Rotation3d(0, 40, 0));
+    public static final Transform3d RobotToCamera = new Transform3d(0, 0, 0.6477, new Rotation3d(0, Math.toRadians(35), 0));
     public static final IMUAxis robotYawAxis = IMUAxis.kRoll;
-    public static final double axisCorrectionDegrees = 90;
   }
 }
