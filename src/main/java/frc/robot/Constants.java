@@ -32,7 +32,7 @@ public final class Constants {
     public static final double wheelCircumMeters = wheelRadMeters * Math.PI * 2;
     public static final double gearRatio = 8.45;
     public static final double encoderToMeters = wheelCircumMeters / (42.0 * gearRatio);
-    public static final double robotMassKG = 51.256; //42.86448; 113.0lbs with battery
+    public static final double robotMassKG = 51.256; // 113.0lbs with battery
     public static final double robotWidth = 22 * 2.54 / 100;
     public static final double robotHeight = 30 * 2.54 / 100;
     public static final double robotDepth = 30 * 2.54 / 100;

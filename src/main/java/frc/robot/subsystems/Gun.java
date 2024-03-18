@@ -45,19 +45,15 @@ public class Gun extends SubsystemBase {
     shooterR.setIdleMode(IdleMode.kCoast);
     shooterL.clearFaults();
     shooterR.clearFaults();
-    //System.out.println(shooterL.isFollower());
-    //shooterR.follow(shooterL, true);
+    //shooterL.follow(shooterL);
+    //shooterR.follow(shooterR);
     encoderL = shooterL.getEncoder();
     encoderR = shooterR.getEncoder();
   }
 
   @Override
   public void periodic() {
-    /*double lpower = controllerL.calculate(encoderL.getVelocity() / 42);
-    shooterL.set(-lpower);
-    System.out.println("L power: " + lpower);
-    shooterR.set(-controllerR.calculate(encoderR.getVelocity() / 42));
-    super.periodic();*/
+    
   }
 
   /**
@@ -68,17 +64,16 @@ public class Gun extends SubsystemBase {
   public void fire(double speed, double spin) {
     shooterR.setVoltage((speed + spin) * 12);
     shooterL.setVoltage((speed - spin) * 12);
-    System.out.println("out: " + shooterL.getAppliedOutput());
-    //controllerL.setGoal(speed + spin);
-    //controllerR.setGoal(speed - spin);
   }
 
   public Pose2d getClosestSpeaker(Pose2d pose) {
     Translation2d dif = FieldConstants.speakerLocation.getTranslation().minus(pose.getTranslation());
     Translation2d dif2 = FieldConstants.speakerLocation2.getTranslation().minus(pose.getTranslation());
     if (dif2.getNorm() < dif.getNorm()) {
+      System.out.println("Closer to blue");
       return FieldConstants.speakerLocation2;
     }
+    System.out.println("Closer to red");
     return FieldConstants.speakerLocation;
   }
 
@@ -90,9 +85,9 @@ public class Gun extends SubsystemBase {
   public void fireCompensate(Pose2d pose) {
     Pose2d speaker = getClosestSpeaker(pose);
     double distance = speaker.minus(pose).getTranslation().getNorm();
+    System.out.println("Distance to speaker: " + distance);
 
     if (distance > 1) {
-      System.out.println("Distance too far to shoot");
       return;
     }
     if (distance > 0.5588) {
