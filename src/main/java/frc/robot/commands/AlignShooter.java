@@ -33,10 +33,13 @@ public class AlignShooter extends Command {
   public AlignShooter(Drivetrain d, Pose2d initial) {
     drivetrain = d;
     d.setPose(initial);
+    t = new Timer();
   }
 
   @Override
   public void initialize() {
+    t.reset();
+    t.start();
     //ArrayList<Pose2d> points = new ArrayList<Pose2d>(0);
     //Pose2d closestSpeaker = speakerLocation;
     // Difference vector
