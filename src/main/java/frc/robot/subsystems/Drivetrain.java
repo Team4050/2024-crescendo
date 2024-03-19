@@ -157,6 +157,11 @@ public class Drivetrain extends SubsystemBase {
      * The problem, therefore, is in the system's model
      * I never got a fully confirmed calculation on the motor resistances.
      * 12V/60A (Smart limit) = 0.2
+     * 
+     * Found 1 issue, velocities were being fed as RPM, instead of ticks/s (fixed)
+     * Related to that, initial encoder positions were not scaled by encoder ticks, causing a jerk when starting auto (fixed)
+     * Limelight usage causes pose estimator to be thrown off, and reports impossible positions due to april tags not being mounted securely
+     * Does not turn in place
      */
     Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 70, 0.15, 0.15);
     Vector<N2> relems = VecBuilder.fill(0.3, 0.3);
@@ -185,8 +190,8 @@ public class Drivetrain extends SubsystemBase {
         new DifferentialDrivePoseEstimator(
             kinematics,
             new Rotation2d(),
-            leftEncoder.getPosition() * RobotConstants.encoderToMeters,
-            rightEncoder.getPosition() * RobotConstants.encoderToMeters,
+            leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters,
+            rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters,
             initial);
 
     // Ramsete controller tuning for meters is 2.0 & 0.7
@@ -357,8 +362,9 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     super.periodic();
 
-    LEMA = LEMA + alpha * (leftEncoder.getVelocity() - LEMA);
-    REMA = REMA + alpha * (rightEncoder.getVelocity() - REMA);
+    // Bruh why am I blind
+    LEMA = LEMA + alpha * ((leftEncoder.getVelocity() * 42 / 60) - LEMA);
+    REMA = REMA + alpha * ((rightEncoder.getVelocity() * 42 / 60) - REMA);
 
     loop++;
     if (loop > 150) {
