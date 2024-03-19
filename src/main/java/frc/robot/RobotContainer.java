@@ -212,8 +212,8 @@ public class RobotContainer {
     shooter.setDefaultCommand(
         new RunCommand(
             () -> {
-              if (y.getAsBoolean()) {
-                shooter.fire(adjustedShooterSpeed, shooterspin);
+              if (x.getAsBoolean() || y.getAsBoolean()) {
+                shooter.fire(0.35, 0);
                 //shooter.fireCompensate(0);
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(1.0, 0);

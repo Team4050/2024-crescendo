@@ -40,10 +40,10 @@ public class Intake extends SubsystemBase {
   public void setIntake(boolean state, boolean reverse) {
     this.state = state;
     if (state) {
-      controller.setReference(-0.5, ControlType.kDutyCycle);
+      controller.setReference(-1.0, ControlType.kDutyCycle);
       return;
     } else if (reverse) {
-      controller.setReference(0.5, ControlType.kDutyCycle);
+      controller.setReference(1.0, ControlType.kDutyCycle);
       return;
     }
     controller.setReference(0, ControlType.kDutyCycle);
