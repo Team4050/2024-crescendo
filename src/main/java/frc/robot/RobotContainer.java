@@ -174,12 +174,16 @@ public class RobotContainer {
         new RunCommand(
           () -> {
               double f = -m_driverController.getLeftY();
-              double t = (Math.tan(m_driverController.getRightX(0.04f) * 1.25)) * (1 - Math.pow(f * 0.707, 2)) / 3;
-              System.out.println(t);
+              double t = 0;
+              if (mb.getAsBoolean()) {
+                t = m_driverController.getRightX(0.04f);
+              } else {
+                t = (Math.tan(m_driverController.getRightX(0.04f) * 1.25)) * (1 - Math.pow(f * 0.707, 2)) / 3;
+              }
+              //System.out.println(t);
               /*if (Math.abs(m_driverController.getRightX(0.04f)) > 0.8 && f < 0.2) {
                 t = m_driverController.getRightX(0.04f);
               }*/
-              System.out.println(t);
               if (reverse) {
                 f = -f;
               }
@@ -209,15 +213,15 @@ public class RobotContainer {
             drivetrain);
 
     driveControlChooser = new SendableChooser<RunCommand>();
-    driveControlChooser.setDefaultOption("Default arcade control scheme", drivetrainDefault);
+    driveControlChooser.setDefaultOption("Default arcade control scheme (scaled curve)", drivetrainScaledCurve);
     driveControlChooser.addOption("Drivetrain arcade with turn ramping control", drivetrainRamp);
     driveControlChooser.addOption(
         "Drivetrain arcade with alt turning (primary B button)", drivetrainRampDefensive);
     driveControlChooser.addOption("Drivetrain arcade with turn ramping scaled by forward speed", drivetrainScaledCurve);
-    driveControlChooser.addOption(
-        "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
-    driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
-    driveControlChooser.addOption("Tank control scheme", drivetrainTank);
+    //driveControlChooser.addOption(
+    //    "Arcade control using a flight stick for primary control", drivetrainArcade1Stick);
+    //driveControlChooser.addOption("Arcade control using the left stick", drivetrainArcade1Stick);
+    //driveControlChooser.addOption("Tank control scheme", drivetrainTank);
     SmartDashboard.putData("Drive control chooser", driveControlChooser);
 
     drivetrain.setDefaultCommand(drivetrainDefault);
@@ -236,9 +240,9 @@ public class RobotContainer {
     shooter.setDefaultCommand(
         new RunCommand(
             () -> {
-              if (y.getAsBoolean()) {
-                shooter.fire(adjustedShooterSpeed, shooterspin);
-                //shooter.fireCompensate(drivetrain.get());
+              if (x.getAsBoolean() || y.getAsBoolean()) {
+                shooter.fire(0.35, 0);
+                //shooter.fireCompensate(0);
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(1.0, 0);
               } else {
