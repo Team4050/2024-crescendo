@@ -35,8 +35,8 @@ public class TestAuto extends Command {
     ArrayList<Pose2d> list = new ArrayList<Pose2d>();
     // 3.93954
     drive.set(0.9, 0.9);
-    list.add(new Pose2d(0, 0, new Rotation2d()));
-    list.add(new Pose2d(1.0, 0, new Rotation2d()));
+    //list.add(new Pose2d(0, 0, new Rotation2d()));
+    //list.add(new Pose2d(1.0, 0, new Rotation2d()));
     trajectory = TrajectoryGenerator.generateTrajectory(list, tconfig);
     end = timer.get() + 0.7;
     // 3 means 11 inches
