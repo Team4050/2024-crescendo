@@ -162,6 +162,9 @@ public class Drivetrain extends SubsystemBase {
      * Related to that, initial encoder positions were not scaled by encoder ticks, causing a jerk when starting auto (fixed)
      * Limelight usage causes pose estimator to be thrown off, and reports impossible positions due to april tags not being mounted securely
      * Does not turn in place
+     * 
+     * Found another issue/inaccuracy, motor resistances and Kt values. 
+     * Both vary with temperature, so I'm calculating based off of vex motor tests at 12V and 10V, and averaging between the two
      */
     Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 70, 0.15, 0.15);
     Vector<N2> relems = VecBuilder.fill(0.3, 0.3);
@@ -171,7 +174,17 @@ public class Drivetrain extends SubsystemBase {
     // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia (wikipedia as source lol),
     // Solid rectangular cuboid model:
     // 1/12 * m * (h^2 + w^2)
+    // Torque / Angular accel = J
+    // 
+    //
     // TODO: find L & R resistance R = V/I (stall) = 12V/100A = 0.12?
+    // Resistence varies with temperature, according to vex tests:
+    // 12V resistance is 0.06, 10V is 0.07, 8V is 0.09, 6V is 0.11
+    //
+    // Just for fun, theoretical max speed
+    // 5280 RPM (Vex 12V test max speed) / 60 * gear ratio (1/8.46) * wheel circumference (0.4788m) = 
+    // 5.48 m/s!
+    // Our max speed while driving is probably closer to 3 m/s however, meaning 50% motor efficiency according to 12V vex test
     System.out.println(0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)));
     drivetrainModel =
         buildPlant(Constants.RobotConstants.wheelRadMeters, 
@@ -180,9 +193,10 @@ public class Drivetrain extends SubsystemBase {
             RobotConstants.gearRatio, 
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
-            50.265,//96.028, 
-            0.2, 
-            0.2);
+            49.5324, // Empirical test from REV
+            0.0199, // (3.28 / 181) (12V test) + (3.02 / 139) (10V test), //2.6 / 105, // Stall torque (Nm) / stall current (A) from data sheet
+            0.065, 
+            0.065);
 
     controller = new LTVDifferentialDriveController(drivetrainModel, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
@@ -236,10 +250,10 @@ public class Drivetrain extends SubsystemBase {
    * B = [ c1 * C2  c2 * C4 ]
    *     [ c2 * C2  c1 * C4 ]
    * 
-   * Kv for NEO is 917 under no load, 917 in RPM * 2 * PI * / 60 = 96.028
+   * Empirical Kv for NEO v1.1 is 473, 917 in RPM * 2 * PI * / 60 = 96.028
    * However, in the SparkMax, the Kv is set to 480.
    * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
-   * https://www.revrobotics.com/content/docs/REV-21-1651-DS.pdf
+   * https://www.revrobotics.com/content/docs/REV-21-1650-DS.pdf
    * 
    * determining Kt is stall torque over stall current
    * Kt = 60 / 2pi * Kv  Kt = T / I = 0.0108
@@ -255,11 +269,14 @@ public class Drivetrain extends SubsystemBase {
       double J,
       double m,
       double Kv,
+      double Kt,
       double Rl,
       double Rr) {
     /*
+     * Kt = torque / current
+     * https://www.revrobotics.com/content/docs/REV-21-1650-DS.pdf
      */
-    double Kt = 0.97 / 100;//1.08 * 2 / 111;//60 / (2 * Math.PI * Kv);
+    //double Kt = 2.6 / 105;
     double C1 = -Math.pow(Gl, 2) * Kt / (Rl * Kv * Math.pow(r, 2));
     double C2 = Gl * Kt / (Rl * r);
     double C3 = -Math.pow(Gr, 2) * Kt / (Rr * Kv * Math.pow(r, 2));
@@ -376,6 +393,7 @@ public class Drivetrain extends SubsystemBase {
       //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
       //System.out.println("Pos: " + position.getX());
       //System.out.println(getEncoderV()[0] + " " + getEncoderV()[1]);
+      System.out.println("Left output: " + leftF.getOutputCurrent() + " " + leftF.getBusVoltage());
       System.out.println(position);
       System.out.println("imu yaw: " + getTransformedIMU());
       loop = 0;
