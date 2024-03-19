@@ -66,7 +66,7 @@ public class Drivetrain extends SubsystemBase {
 
   /* Sensors */
   private HazardVision vision;
-  private boolean useVision = true;
+  private boolean useVision = false;
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
   private boolean useIMU = true;
@@ -147,7 +147,7 @@ public class Drivetrain extends SubsystemBase {
       imu = null;
     }
     // X, Y, Rotation in radians, XVel, YVel
-    Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 80, 0.15, 0.15);
+    Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 70, 0.15, 0.15);
     Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
 
     // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1

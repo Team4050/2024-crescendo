@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Intake;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +22,8 @@ import java.util.Set;
 /** Auto for testing autonomous movement methods */
 public class TestAuto extends Command {
   private Drivetrain drive;
+  private Intake intake;
+  private boolean runIntake;
   private Timer timer;
   private double end;
   private Trajectory trajectory;
@@ -27,10 +31,12 @@ public class TestAuto extends Command {
   private boolean reverse;
   private boolean reset;
 
-  public TestAuto(Drivetrain d, Pose2d[] list, boolean reverse, boolean reset) {
+  public TestAuto(Drivetrain d, Intake i, boolean runIntake, Pose2d[] list, boolean reverse, boolean reset) {
     drive = d;
+    intake = i;
     waypoints = list;
     this.reverse = reverse;
+    this.runIntake = runIntake;
     this.reset = reset;
     timer = new Timer();
   }
@@ -38,7 +44,7 @@ public class TestAuto extends Command {
   @Override
   public void initialize() {
     TrajectoryConfig tconfig =
-        new TrajectoryConfig(Units.MetersPerSecond.of(2), Units.MetersPerSecondPerSecond.of(1));
+        new TrajectoryConfig(Units.MetersPerSecond.of(1.5), Units.MetersPerSecondPerSecond.of(1));
     tconfig.setReversed(reverse);
 
     timer.reset();
@@ -76,13 +82,16 @@ public class TestAuto extends Command {
         TrajectoryGenerator.generateTrajectory(
             list,
             tconfig);
-    end = timer.get() + trajectory.getTotalTimeSeconds() + 4.0;
+    end = timer.get() + trajectory.getTotalTimeSeconds() + 2.0;
   }
 
   int loop = 0;
 
   @Override
   public void execute() {
+    if (runIntake) {
+      intake.setIntake(true, true);
+    }
     drive.follow(trajectory, timer.get());
     State s = trajectory.sample(timer.get());
     loop++;
@@ -111,9 +120,16 @@ public class TestAuto extends Command {
   }
 
   @Override
+  public void end(boolean interrupted) {
+    drive.set(0, 0);
+      intake.setIntake(false, false);
+  }
+
+  @Override
   public Set<Subsystem> getRequirements() {
     HashSet<Subsystem> set = new HashSet<Subsystem>(1);
     set.add(drive);
+    set.add(intake);
     return set;
   }
 }

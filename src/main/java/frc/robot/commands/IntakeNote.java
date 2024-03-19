@@ -6,43 +6,43 @@ import java.util.Set;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Gun;
 import frc.robot.subsystems.Intake;
 
 public class IntakeNote extends Command {
-  private Gun gun;
   private Intake intake;
+  private Drivetrain drive;
   private Timer timer;
 
-  public IntakeNote(Gun gun, Intake intake) {
+  public IntakeNote(Drivetrain drive, Intake intake) {
     this.intake = intake;
-    this.gun = gun;
+    this.drive = drive;
     timer = new Timer();
   }
 
   @Override
   public void initialize() {
-    gun = new Gun();
-    intake = new Intake();
     timer.start();
     super.initialize();
   }
 
   @Override
   public void execute() {
+    drive.set(0.4, 0.4);
     intake.setIntake(true, false);
     super.execute();
   }
 
   @Override
   public boolean isFinished() {
-      return timer.get() > 4.0;
+      return timer.get() > 0.5;
   }
 
   @Override
   public Set<Subsystem> getRequirements() {
       HashSet<Subsystem> reqs = new HashSet<Subsystem>();
-      reqs.add(gun);
+      reqs.add(drive);
       reqs.add(intake);
       return reqs;
   }

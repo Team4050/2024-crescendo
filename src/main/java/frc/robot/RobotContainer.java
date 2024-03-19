@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlignShooter;
+import frc.robot.commands.IntakeNote;
 import frc.robot.commands.PathweaverTest;
 import frc.robot.commands.TestAuto;
 import frc.robot.commands.TimeTesting;
@@ -100,20 +101,18 @@ public class RobotContainer {
 
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: test", new SequentialCommandGroup(
-      new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 6.6, new Rotation2d(Math.toRadians(-180))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, true),
       new Shoot(shooter, intake),
-      new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
-      new TestAuto(drivetrain, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false)
+      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(6, 6, new Rotation2d(Math.toRadians(0)))}, false, false),
+      //new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(5.5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
+      new TestAuto(drivetrain, intake, false, new Pose2d[] {new Pose2d(6, 6, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false),
+      new Shoot(shooter, intake)
     ));
-    autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(0)), new Pose2d(5.7, 6.7, new Rotation2d(0))}, false, true));
+    autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(0, 0, new Rotation2d(0)), new Pose2d(0, 0, new Rotation2d(0))}, false, true));
     autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
     autoChooser.addOption("Align", new AlignShooter(drivetrain, new Pose2d(1.4, 5.5, new Rotation2d())));
     autoChooser.addOption("Time sequence", 
         new SequentialCommandGroup(
-            new TimeTesting(drivetrain, 90, true), 
-            new TimeTesting(drivetrain, -90, true),
-            new TimeTesting(drivetrain, 1.0, false),
-            new TimeTesting(drivetrain, -1.0, false)));
+            new TimeTesting(drivetrain, 90, false)));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
 

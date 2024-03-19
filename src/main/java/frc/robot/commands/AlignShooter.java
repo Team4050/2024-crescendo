@@ -40,20 +40,20 @@ public class AlignShooter extends Command {
   public void initialize() {
     t.reset();
     t.start();
-    //ArrayList<Pose2d> points = new ArrayList<Pose2d>(0);
-    //Pose2d closestSpeaker = speakerLocation;
+    ArrayList<Pose2d> points = new ArrayList<Pose2d>(0);
+    Pose2d closestSpeaker = FieldConstants.speakerLocation;
     // Difference vector
     Translation2d dif = FieldConstants.speakerLocation.getTranslation().minus(drivetrain.get().getTranslation());
     Translation2d dif2 = FieldConstants.speakerLocation2.getTranslation().minus(drivetrain.get().getTranslation());
     if (dif2.getNorm() < dif.getNorm()) {
       dif = dif2;
-      //closestSpeaker = speakerLocation2;
+      closestSpeaker = FieldConstants.speakerLocation2;
     }
     targetPose = new Pose2d(drivetrain.get().getX(), drivetrain.get().getY(), new Rotation2d(-dif.getX(), -dif.getY()));
     // Normalize
     //dif = dif.times(1 / dif.getNorm());
 
-    /*points.add(drivetrain.get());
+    points.add(drivetrain.get());
     points.add(
         new Pose2d(
             // Scale difference norm by desired length
@@ -65,13 +65,14 @@ public class AlignShooter extends Command {
     t = new Timer();
     t.start();
     System.out.println(t.get());
-    super.initialize();*/
+    super.initialize();
   }
 
   @Override
   public void execute() {
     //drivetrain.follow(s, t.get());
-    drivetrain.control(targetPose, 0, 0);
+    double[] v = drivetrain.getEncoderV();
+    drivetrain.control(targetPose, v[0] * RobotConstants.encoderToMeters, v[1] * RobotConstants.encoderToMeters);
   }
 
   private void alignManual() {
