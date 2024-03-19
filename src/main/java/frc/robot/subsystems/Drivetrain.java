@@ -147,8 +147,20 @@ public class Drivetrain extends SubsystemBase {
       imu = null;
     }
     // X, Y, Rotation in radians, XVel, YVel
+    //Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 70, 0.15, 0.15);
+    //Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
+
+    /*
+     * Monday night testing results: not good. Never reaches setpoints, jitters and overcorrects on straight lines.
+     * This means two things: 1) The system is never reaching angle and velocity setpoints when the running appears smooth 2) The system is not properly tuned to converge to a setpoint when it reaches it
+     * Increasing the control effort won't fix this, neither will adjusting tolerances.
+     * The problem, therefore, is in the system's model
+     * I never got a fully confirmed calculation on the motor resistances.
+     * 12V/60A (Smart limit) = 0.2
+     */
     Vector<N5> qelems = VecBuilder.fill(0.08, 0.08, Math.PI / 70, 0.15, 0.15);
-    Vector<N2> relems = VecBuilder.fill(0.5, 0.5);
+    Vector<N2> relems = VecBuilder.fill(0.3, 0.3);
+
 
     // Gear ratio for 2022 (Omega) was 10.75:1. For 2024, it is 8.45:1
     // Moment of inertia based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#Moments_of_inertia (wikipedia as source lol),
@@ -164,8 +176,8 @@ public class Drivetrain extends SubsystemBase {
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
             50.265,//96.028, 
-            0.125, 
-            0.125);
+            0.2, 
+            0.2);
 
     controller = new LTVDifferentialDriveController(drivetrainModel, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
@@ -220,10 +232,11 @@ public class Drivetrain extends SubsystemBase {
    *     [ c2 * C2  c1 * C4 ]
    * 
    * Kv for NEO is 917 under no load, 917 in RPM * 2 * PI * / 60 = 96.028
+   * However, in the SparkMax, the Kv is set to 480.
    * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
    * https://www.revrobotics.com/content/docs/REV-21-1651-DS.pdf
    * 
-   * determining Kt is simply an inversion of Kv and a unit conversion, or stall torque over stall current
+   * determining Kt is stall torque over stall current
    * Kt = 60 / 2pi * Kv  Kt = T / I = 0.0108
    * https://motors.vex.com/other-motors/neo550
    * https://electronics.stackexchange.com/questions/531406/how-to-calculate-the-torque-constant-for-a-bldc-motor

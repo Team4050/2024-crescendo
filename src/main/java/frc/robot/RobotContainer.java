@@ -112,7 +112,12 @@ public class RobotContainer {
     autoChooser.addOption("Align", new AlignShooter(drivetrain, new Pose2d(1.4, 5.5, new Rotation2d())));
     autoChooser.addOption("Time sequence", 
         new SequentialCommandGroup(
-            new TimeTesting(drivetrain, 90, false)));
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, 2, false),
+            new IntakeNote(drivetrain, intake),
+            new TimeTesting(drivetrain, -2, false),
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, 5, false)));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
 
