@@ -62,27 +62,11 @@ public class TestAuto extends Command {
       list.add(waypoints[i]);
     }
     // 3.93954
-    //drive.set(0.9, 0.9);
-    /*list.add(new Pose2d(0, 0, new Rotation2d()));
-    list.add(new Pose2d(2.0, 1.0, new Rotation2d(Math.toRadians(0))));
-    list.add(new Pose2d(3.0, 0.0, new Rotation2d(Math.toRadians(-90))));
-    list.add(new Pose2d(4.0, -1.0, new Rotation2d()));
-    list.add(new Pose2d(5.0, 0.0, new Rotation2d(90)));
-    list.add(new Pose2d(6.0, 1.0, new Rotation2d()));
-    list.add(new Pose2d(7.0, 0.0, new Rotation2d()));*/
-    //list.add(new Pose2d(1.4, 5.5, new Rotation2d()));
-    //list.add(new Pose2d(6.0, 6.7, new Rotation2d(Math.toRadians(0))));
-
-    //list.add(new Pose2d(6.0, 6.7, new Rotation2d(Math.toRadians(0))));
-    //list.add(new Pose2d(1.4, 5.5, new Rotation2d()));
-    //tconfig.setReversed(true);
-
-    //list.add(new Pose2d(10.0, 0, new Rotation2d(Math.toRadians(0))));
     trajectory =
         TrajectoryGenerator.generateTrajectory(
             list,
             tconfig);
-    end = timer.get() + trajectory.getTotalTimeSeconds() + 2.0;
+    end = timer.get() + trajectory.getTotalTimeSeconds();
   }
 
   int loop = 0;
@@ -90,7 +74,7 @@ public class TestAuto extends Command {
   @Override
   public void execute() {
     if (runIntake) {
-      intake.setIntake(true, true);
+      intake.setIntake(false, true);
     }
     drive.follow(trajectory, timer.get());
     State s = trajectory.sample(timer.get());

@@ -102,22 +102,37 @@ public class RobotContainer {
     autoChooser = new SendableChooser<Command>();
     autoChooser.setDefaultOption("Default auto: test", new SequentialCommandGroup(
       new Shoot(shooter, intake),
-      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(6, 6, new Rotation2d(Math.toRadians(0)))}, false, false),
+      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0)))}, false, true),
       //new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(5.5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
-      new TestAuto(drivetrain, intake, false, new Pose2d[] {new Pose2d(6, 6, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false),
-      new Shoot(shooter, intake)
+      new TestAuto(drivetrain, intake, false, new Pose2d[] {new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false),
+      new Shoot(shooter, intake),
+      new Shoot(shooter, intake),
+      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(6, 6, new Rotation2d(Math.toRadians(0)))}, false, false)
     ));
-    autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(0, 0, new Rotation2d(0)), new Pose2d(0, 0, new Rotation2d(0))}, false, true));
-    autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
-    autoChooser.addOption("Align", new AlignShooter(drivetrain, new Pose2d(1.4, 5.5, new Rotation2d())));
+    //autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(0, 0, new Rotation2d(0)), new Pose2d(0, 0, new Rotation2d(0))}, false, true));
+    //autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
+    //autoChooser.addOption("Align", new AlignShooter(drivetrain, new Pose2d(1.4, 5.5, new Rotation2d())));
     autoChooser.addOption("Time sequence", 
         new SequentialCommandGroup(
             new Shoot(shooter, intake),
-            new TimeTesting(drivetrain, 2, false),
-            new IntakeNote(drivetrain, intake),
-            new TimeTesting(drivetrain, -2, false),
+            new TimeTesting(drivetrain, intake, 0.75, false, true),
+            //new IntakeNote(drivetrain, intake),
+            new TimeTesting(drivetrain, intake, -0.75, false, false),
             new Shoot(shooter, intake),
-            new TimeTesting(drivetrain, 5, false)));
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, intake, 0.75, false, false)));
+    autoChooser.addOption("Steal from middle",
+        new SequentialCommandGroup(
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, intake, 0.75, false, true),
+            //new IntakeNote(drivetrain, intake),
+            new TimeTesting(drivetrain, intake, -0.75, false, false),
+            new Shoot(shooter, intake),
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, intake, 0.75, false, false),
+            new TimeTesting(drivetrain, intake, 45, true, false),
+            new TimeTesting(drivetrain, intake, 1.6, false, true)));
+    autoChooser.addOption("Turning", new TimeTesting(drivetrain, intake, 120, true, false));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
 

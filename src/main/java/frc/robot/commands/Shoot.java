@@ -39,7 +39,7 @@ public class Shoot extends Command {
     @Override
     public void execute() {
         intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
-        shooter.fire(0.5, 0);
+        shooter.fire(0.35, 0);
         super.execute();
     }
 

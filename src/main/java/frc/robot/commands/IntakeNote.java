@@ -29,14 +29,16 @@ public class IntakeNote extends Command {
 
   @Override
   public void execute() {
-    drive.set(0.4, 0.4);
-    intake.setIntake(true, false);
+    if (timer.get() < 1.0) {
+      drive.set(0.4, 0.4);
+    }
+    intake.setIntake(false, true);
     super.execute();
   }
 
   @Override
   public boolean isFinished() {
-      return timer.get() > 0.5;
+      return timer.get() > 1.5;
   }
 
   @Override

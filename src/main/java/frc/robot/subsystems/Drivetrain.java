@@ -175,7 +175,6 @@ public class Drivetrain extends SubsystemBase {
     // Solid rectangular cuboid model:
     // 1/12 * m * (h^2 + w^2)
     // Torque / Angular accel = J
-    // 
     //
     // TODO: find L & R resistance R = V/I (stall) = 12V/100A = 0.12?
     // Resistence varies with temperature, according to vex tests:
@@ -183,20 +182,20 @@ public class Drivetrain extends SubsystemBase {
     //
     // Just for fun, theoretical max speed
     // 5280 RPM (Vex 12V test max speed) / 60 * gear ratio (1/8.46) * wheel circumference (0.4788m) = 
-    // 5.48 m/s!
+    // ~5.48 m/s!
     // Our max speed while driving is probably closer to 3 m/s however, meaning 50% motor efficiency according to 12V vex test
     System.out.println(0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)));
     drivetrainModel =
         buildPlant(Constants.RobotConstants.wheelRadMeters, 
-            0.27305,
+            RobotConstants.robotTrackWidth / 2,
             RobotConstants.gearRatio, 
             RobotConstants.gearRatio, 
             0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
             49.5324, // Empirical test from REV
-            0.0199, // (3.28 / 181) (12V test) + (3.02 / 139) (10V test), //2.6 / 105, // Stall torque (Nm) / stall current (A) from data sheet
-            0.065, 
-            0.065);
+            0.0199, // (3.28 / 181) (12V test) + (3.02 / 139) (10V test), Stall torque (Nm) / stall current (A) from data sheet
+            0.08, 
+            0.08);
 
     controller = new LTVDifferentialDriveController(drivetrainModel, RobotConstants.robotTrackWidth, qelems, relems, 0.02);
 
@@ -250,14 +249,16 @@ public class Drivetrain extends SubsystemBase {
    * B = [ c1 * C2  c2 * C4 ]
    *     [ c2 * C2  c1 * C4 ]
    * 
-   * Empirical Kv for NEO v1.1 is 473, 917 in RPM * 2 * PI * / 60 = 96.028
+   * Empirical Kv for NEO v1.1 is 473 in RPM * 2 * PI * / 60 = 49.5324
    * However, in the SparkMax, the Kv is set to 480.
    * https://www.brushless.com/how-to-calculate-the-kv-value-of-brushless-motor
    * https://www.revrobotics.com/content/docs/REV-21-1650-DS.pdf
    * 
    * determining Kt is stall torque over stall current
    * Kt = 60 / 2pi * Kv  Kt = T / I = 0.0108
-   * https://motors.vex.com/other-motors/neo550
+   * avg of (3.28 / 181) (12V vex test) and (3.02 / 139) (10V vex test)
+   * https://motors.vex.com/other-motors/neo
+   * https://www.chiefdelphi.com/t/pic-final-2011-drivetrain/108808
    * https://electronics.stackexchange.com/questions/531406/how-to-calculate-the-torque-constant-for-a-bldc-motor
    * @return A LinearSystem that represents the drivetrain
    */
@@ -276,7 +277,6 @@ public class Drivetrain extends SubsystemBase {
      * Kt = torque / current
      * https://www.revrobotics.com/content/docs/REV-21-1650-DS.pdf
      */
-    //double Kt = 2.6 / 105;
     double C1 = -Math.pow(Gl, 2) * Kt / (Rl * Kv * Math.pow(r, 2));
     double C2 = Gl * Kt / (Rl * r);
     double C3 = -Math.pow(Gr, 2) * Kt / (Rr * Kv * Math.pow(r, 2));
@@ -385,21 +385,29 @@ public class Drivetrain extends SubsystemBase {
 
     loop++;
     if (loop > 150) {
-      /*System.out.println("LeftF duty cycle, bus voltage: " + leftF.getAppliedOutput() + " " + leftF.getBusVoltage());
-      System.out.println("LeftR duty cycle, bus voltage: " + leftR.getAppliedOutput() + " " + leftR.getBusVoltage());
-      System.out.println("RightF duty cycle, bus voltage: " + rightF.getAppliedOutput() + " " + rightF.getBusVoltage());
-      System.out.println("RightR duty cycle, bus voltage: " + rightR.getAppliedOutput() + " " + rightR.getBusVoltage());
-      */
-      //System.out.println("L, R: " + ((leftEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)) + " " + ((rightEncoder.getVelocity() * Constants.RobotConstants.encoderToMeters)));
-      //System.out.println("Pos: " + position.getX());
-      //System.out.println(getEncoderV()[0] + " " + getEncoderV()[1]);
-      System.out.println("Left output: " + leftF.getOutputCurrent() + " " + leftF.getBusVoltage());
       System.out.println(position);
       System.out.println("imu yaw: " + getTransformedIMU());
       loop = 0;
     }
 
     update();
+    // TODO: test
+    //inertiaLogging();
+  }
+
+  private double vEncP = 0;
+  private double tEnc = Timer.getFPGATimestamp();
+  private void inertiaLogging() {
+    double aIMU = imu.getXFilteredAccelAngle();
+    double vEnc = ((leftEncoder.getVelocity() / 60 * RobotConstants.wheelCircumMeters) + (rightEncoder.getVelocity() / 60 * RobotConstants.wheelCircumMeters)) / RobotConstants.robotTrackWidth * Math.PI;
+    double aEnc = (vEnc - vEncP) / (Timer.getFPGATimestamp() - tEnc);
+    vEncP = vEnc;
+    tEnc = Timer.getFPGATimestamp();
+    double avgT = ((leftF.getOutputCurrent() + rightF.getOutputCurrent()) * 0.0199);
+    System.out.println("Angular accel measured by IMU: " + aIMU);
+    System.out.println("Angular velocity & accel measured by encoders: " + vEnc + " " + aEnc);
+    System.out.println("Applied torque: " + avgT);
+    System.out.println("Moment of Inertias: " + avgT / aIMU + " " + avgT / aEnc);
   }
 
   public void update() {
