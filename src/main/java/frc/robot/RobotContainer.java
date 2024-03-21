@@ -259,7 +259,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(
         new RunCommand(
             () -> {
-              if (x.getAsBoolean() || y.getAsBoolean()) {
+              if (y.getAsBoolean()) {
                 shooter.fire(0.35, 0);
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(0.6, 0);
@@ -271,6 +271,9 @@ public class RobotContainer {
                 shooter.fire(0.12, 0);
               } else if (povRight.getAsBoolean()) {
                 shooter.fire(0.16, 0);
+                // A B start
+              } else if (x.getAsBoolean()) {
+                shooter.fire(0.35, 0);
               } else {
                 shooter.fire(0, 0);
               }
