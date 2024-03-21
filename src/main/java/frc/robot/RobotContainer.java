@@ -100,7 +100,7 @@ public class RobotContainer {
     SmartDashboard.putNumber("shooter spin", Constants.MotorDriveValues.shooterSpeedAmp);
 
     autoChooser = new SendableChooser<Command>();
-    autoChooser.setDefaultOption("Default auto: test", new SequentialCommandGroup(
+    autoChooser.setDefaultOption("Default auto: time sequence", new SequentialCommandGroup(
       new Shoot(shooter, intake),
       new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0)))}, false, true),
       //new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(5.5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
@@ -259,7 +259,7 @@ public class RobotContainer {
                 shooter.fire(0.35, 0);
                 //shooter.fireCompensate(0);
               } else if (leftTrigger.getAsBoolean()) {
-                shooter.fire(1.0, 0);
+                shooter.fire(0.6, 0);
               } else {
                 shooter.fire(0 , 0);
               }
