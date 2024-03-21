@@ -76,6 +76,10 @@ public class RobotContainer {
   private final Trigger mb = m_driverController.b();
   private final Trigger leftTrigger = m_secondaryController.leftTrigger();
   private final Trigger rightTrigger = m_secondaryController.rightTrigger();
+  private final Trigger povUp = m_secondaryController.povUp();
+  private final Trigger povDown = m_secondaryController.povDown();
+  private final Trigger povLeft = m_secondaryController.povLeft();
+  private final Trigger povRight = m_secondaryController.povRight();
   //private final Joystick m_driverJoystick =
   //    new Joystick(OperatorConstants.kDriverFStickControllerPort);
 
@@ -257,11 +261,18 @@ public class RobotContainer {
             () -> {
               if (x.getAsBoolean() || y.getAsBoolean()) {
                 shooter.fire(0.35, 0);
-                //shooter.fireCompensate(0);
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(0.6, 0);
+              } else if (povUp.getAsBoolean()) {
+                shooter.fire(0.1, 0);
+              } else if (povDown.getAsBoolean()) {
+                shooter.fire(0.14, 0);
+              } else if (povLeft.getAsBoolean()) {
+                shooter.fire(0.12, 0);
+              } else if (povRight.getAsBoolean()) {
+                shooter.fire(0.16, 0);
               } else {
-                shooter.fire(0 , 0);
+                shooter.fire(0, 0);
               }
 
             },
