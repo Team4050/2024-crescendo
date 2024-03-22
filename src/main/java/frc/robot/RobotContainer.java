@@ -100,23 +100,15 @@ public class RobotContainer {
     shooter = new Gun();
 
     // SmartDashboard.putData("Shooter speed", 1);
-    SmartDashboard.putNumber("shooter", Constants.MotorDriveValues.shooterSpeedAmp);
-    SmartDashboard.putNumber("shooter spin", Constants.MotorDriveValues.shooterSpeedAmp);
+    SmartDashboard.putNumber("shooter", 0);
+    SmartDashboard.putNumber("shooter spin", 0);
 
     autoChooser = new SendableChooser<Command>();
-    autoChooser.setDefaultOption("Default auto: time sequence", new SequentialCommandGroup(
-      new Shoot(shooter, intake),
-      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0)))}, false, true),
-      //new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(5.5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
-      new TestAuto(drivetrain, intake, false, new Pose2d[] {new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false),
-      new Shoot(shooter, intake),
-      new Shoot(shooter, intake),
-      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(6, 6, new Rotation2d(Math.toRadians(0)))}, false, false)
-    ));
+
     //autoChooser.addOption("Test auto 2", new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(0, 0, new Rotation2d(0)), new Pose2d(0, 0, new Rotation2d(0))}, false, true));
     //autoChooser.addOption("nothing", new RunCommand(() -> {}, drivetrain));
     //autoChooser.addOption("Align", new AlignShooter(drivetrain, new Pose2d(1.4, 5.5, new Rotation2d())));
-    autoChooser.addOption("Time sequence", 
+    autoChooser.setDefaultOption("Time sequence", 
         new SequentialCommandGroup(
             new Shoot(shooter, intake),
             new TimeTesting(drivetrain, intake, 0.75, false, true),
@@ -125,6 +117,10 @@ public class RobotContainer {
             new Shoot(shooter, intake),
             new Shoot(shooter, intake),
             new TimeTesting(drivetrain, intake, 0.75, false, false)));
+    autoChooser.addOption("Time sequence no 2nd note", 
+        new SequentialCommandGroup(
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, intake, 0.75, false, true)));
     autoChooser.addOption("Steal from middle",
         new SequentialCommandGroup(
             new Shoot(shooter, intake),
@@ -136,7 +132,17 @@ public class RobotContainer {
             new TimeTesting(drivetrain, intake, 0.75, false, false),
             new TimeTesting(drivetrain, intake, 45, true, false),
             new TimeTesting(drivetrain, intake, 1.6, false, true)));
-    autoChooser.addOption("Turning", new TimeTesting(drivetrain, intake, 120, true, false));
+    autoChooser.addOption("Drive forward", new TimeTesting(drivetrain, intake, 1.25, false, false));
+    autoChooser.addOption("Model based auto", new SequentialCommandGroup(
+      new Shoot(shooter, intake),
+      new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0)))}, false, true),
+      //new TestAuto(drivetrain, intake, true, new Pose2d[] {new Pose2d(5, 6.6, new Rotation2d(Math.toRadians(0))), new Pose2d(5.5, 6.6, new Rotation2d(Math.toRadians(0)))}, false, false),
+      new TestAuto(drivetrain, intake, false, new Pose2d[] {new Pose2d(4.3, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0)))}, true, false),
+      new Shoot(shooter, intake),
+      new Shoot(shooter, intake),
+      new TestAuto(drivetrain, intake, false, new Pose2d[] {new Pose2d(1.4, 5.5, new Rotation2d(Math.toRadians(0))), new Pose2d(6, 6, new Rotation2d(Math.toRadians(0)))}, false, false)
+    ));
+    //autoChooser.addOption("Turning", new TimeTesting(drivetrain, intake, 120, true, false));
 
     SmartDashboard.putData("Auto chooser", autoChooser);
 
@@ -250,9 +256,9 @@ public class RobotContainer {
               intake.setIntake(rightTrigger.getAsBoolean(), b.getAsBoolean());
 
               if (x.getAsBoolean()) {
-                intake.setConveyor(Constants.MotorDriveValues.conveyorSpeed);
+                intake.setConveyorWithBackoff(true);
               } else {
-                intake.setConveyor(0);
+                intake.setConveyorWithBackoff(false);
               }
             },
             intake));
@@ -264,14 +270,9 @@ public class RobotContainer {
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(0.6, 0);
               } else if (povUp.getAsBoolean()) {
-                shooter.fire(0.1, 0);
+                shooter.fire(0.125, 0);
               } else if (povDown.getAsBoolean()) {
-                shooter.fire(0.14, 0);
-              } else if (povLeft.getAsBoolean()) {
-                shooter.fire(0.12, 0);
-              } else if (povRight.getAsBoolean()) {
-                shooter.fire(0.16, 0);
-                // A B start
+                shooter.fire(0.128, 0);
               } else if (x.getAsBoolean()) {
                 shooter.fire(0.35, 0);
               } else {

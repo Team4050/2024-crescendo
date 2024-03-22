@@ -55,7 +55,6 @@ public class Drivetrain extends SubsystemBase {
   private LinearSystem<N2, N2, N2> drivetrainModel;
   private RamseteController ramController;
 
-  private DifferentialDrive drivetrain;
   private Pose2d position;
   private DifferentialDrivePoseEstimator estimator;
 
@@ -70,9 +69,6 @@ public class Drivetrain extends SubsystemBase {
   // 1.15 degree drift over 2 and a half minutes
   private ADIS16470_IMU imu;
   private boolean useIMU = true;
-
-  private CANcoder leftExternalEncoder;
-  private CANcoder rightExternalEncoder;
 
   private double LEMA = 0;
   private double REMA = 0;
@@ -116,10 +112,6 @@ public class Drivetrain extends SubsystemBase {
 
     leftControl = leftF.getPIDController();
     rightControl = rightF.getPIDController();
-
-    // TODO: Attach external encoders
-    // leftExternalEncoder = new CANcoder(Constants.MotorCANValues.cancoderLeft);
-    // rightExternalEncoder = new CANcoder(Constants.MotorCANValues.cancoderRight);
 
     leftControl.setP(kP);
     leftControl.setI(kI);
@@ -190,7 +182,8 @@ public class Drivetrain extends SubsystemBase {
             RobotConstants.robotTrackWidth / 2,
             RobotConstants.gearRatio, 
             RobotConstants.gearRatio, 
-            0.08333 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
+            //1.2
+            0.08333 * 1.2 * RobotConstants.robotMassKG * (Math.pow(RobotConstants.robotWidth, 2) + Math.pow(RobotConstants.robotDepth, 2)), 
             RobotConstants.robotMassKG, 
             49.5324, // Empirical test from REV
             0.0199, // (3.28 / 181) (12V test) + (3.02 / 139) (10V test), Stall torque (Nm) / stall current (A) from data sheet
@@ -365,7 +358,6 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  // TODO: Test if issues with pose resetting have been fixed
   public void setPose(Pose2d manual) {
     setIMU(manual.getRotation().getDegrees());
     estimator.resetPosition(getTransformedIMU(), leftEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, rightEncoder.getPosition() * 42 * RobotConstants.encoderToMeters, manual);
@@ -391,7 +383,6 @@ public class Drivetrain extends SubsystemBase {
     }
 
     update();
-    // TODO: test
     //inertiaLogging();
   }
 
