@@ -102,6 +102,7 @@ public class RobotContainer {
     // SmartDashboard.putData("Shooter speed", 1);
     SmartDashboard.putNumber("shooter", 0);
     SmartDashboard.putNumber("shooter spin", 0);
+    //SmartDashboard.putNumber("Auto forward movement", 0.75);
 
     autoChooser = new SendableChooser<Command>();
 
@@ -117,10 +118,17 @@ public class RobotContainer {
             new Shoot(shooter, intake),
             new Shoot(shooter, intake),
             new TimeTesting(drivetrain, intake, 0.75, false, false)));
-    autoChooser.addOption("Time sequence no 2nd note", 
+    autoChooser.addOption("Time sequence no 2nd note (no move)", 
+        new SequentialCommandGroup(
+            new Shoot(shooter, intake)));
+    autoChooser.addOption("Time sequence no 2nd note (1 sec move)", 
         new SequentialCommandGroup(
             new Shoot(shooter, intake),
-            new TimeTesting(drivetrain, intake, 0.75, false, true)));
+            new TimeTesting(drivetrain, intake, 1, false, true)));
+    autoChooser.addOption("Time sequence no 2nd note (1.25 sec move)", 
+        new SequentialCommandGroup(
+            new Shoot(shooter, intake),
+            new TimeTesting(drivetrain, intake, 1.25, false, true)));
     autoChooser.addOption("Steal from middle",
         new SequentialCommandGroup(
             new Shoot(shooter, intake),
@@ -266,7 +274,7 @@ public class RobotContainer {
         new RunCommand(
             () -> {
               if (y.getAsBoolean()) {
-                shooter.fire(0.35, 0);
+                shooter.fire(0.4, 0);
               } else if (leftTrigger.getAsBoolean()) {
                 shooter.fire(0.6, 0);
               } else if (povUp.getAsBoolean()) {

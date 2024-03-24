@@ -27,6 +27,7 @@ public class Intake extends SubsystemBase {
     intake = new CANSparkMax(Constants.MotorCANValues.intake, MotorType.kBrushless);
     breakbeam = new DigitalInput(0);
     intake.setIdleMode(IdleMode.kCoast);
+    intake.setSmartCurrentLimit(40);
     conveyor = new TalonSRX(Constants.MotorCANValues.conveyor);
     controller = intake.getPIDController();
     controller.setP(0.2);
@@ -44,10 +45,10 @@ public class Intake extends SubsystemBase {
   public void setIntake(boolean state, boolean reverse) {
     this.state = state;
     if (state) {
-      controller.setReference(-1.0, ControlType.kDutyCycle);
+      controller.setReference(-0.82, ControlType.kDutyCycle);
       return;
     } else if (reverse) {
-      controller.setReference(1.0, ControlType.kDutyCycle);
+      controller.setReference(0.82, ControlType.kDutyCycle);
       return;
     }
     controller.setReference(0, ControlType.kDutyCycle);
